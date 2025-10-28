@@ -8,7 +8,7 @@
                  user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Number Trainer — Phone 100% Fit + Auto Submit</title>
+  <title>Number Trainer — Levels (Static, Cached, Auto Submit + Level field)</title>
 
   <!-- Bootstrap 5.0.2 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
@@ -18,178 +18,145 @@
 
   <style>
     :root{
-      font-size: 18px;  /* balanced phone size */
+      font-size:18px; /* balanced phone size */
       --bg:#0b0f16; --card:#0f1523; --ink:#eef2f8; --muted:#a8b3c7; --border:#1e2a3f;
-      --ok:#22c55e; --bad:#ef4444; --g1:#5aa8ff; --g2:#7bffca;
-      --num-color:#ffd400; /* change to #fff for white numbers */
+      --ok:#22c55e; --bad:#ef4444; --g1:#5aa8ff; --g2:#7bffca; --num:#ffd400;
     }
     *{ -webkit-tap-highlight-color: transparent; }
     html,body{
-      height:100%;
-      margin:0;
-      background:var(--bg);
-      color:var(--ink);
-      -webkit-text-size-adjust:100%;
-      overscroll-behavior:none;
-      touch-action:manipulation;
-      user-select:none;
+      height:100%; margin:0; background:var(--bg); color:var(--ink);
+      -webkit-text-size-adjust:100%; overscroll-behavior:none; touch-action:manipulation; user-select:none;
     }
 
-    /* ----- Layout: exactly fills the screen ----- */
     .app{height:100svh; width:100%; display:flex; flex-direction:column;}
     .card-app{
-      height:100%; width:100%; display:flex; flex-direction:column;
-      border:0; border-radius:0;
+      flex:1; display:flex; flex-direction:column;
       background:
-        radial-gradient(950px 650px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
+        radial-gradient(900px 600px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
         radial-gradient(900px 600px at 110% -10%, rgba(123,255,202,.10), transparent 40%),
         var(--card);
     }
 
-    /* header */
-    .hero{padding:12px 14px calc(8px + env(safe-area-inset-top)); border-bottom:1px solid var(--border);}
-    .badge-pill{
-      display:inline-flex; align-items:center; gap:.45rem;
-      padding:.35rem .7rem; border-radius:999px; font-size:.95rem;
-      background:#0e1422; border:1px solid #203049; color:#d1d9e7;
-    }
+    /* Header + Tabs */
+    .hero{padding:10px 12px calc(8px + env(safe-area-inset-top)); border-bottom:1px solid var(--border);}
+    .badge-pill{display:inline-flex; align-items:center; gap:.45rem; padding:.3rem .65rem; border-radius:999px; font-size:.9rem; background:#0e1422; border:1px solid #203049; color:#d1d9e7;}
     .progress-wrap{height:12px; border-radius:999px; overflow:hidden; background:#0c1220; border:1px solid var(--border);}
     .progress-bar{height:100%; background:linear-gradient(90deg,var(--g1),var(--g2)); transition:width .25s ease;}
-    .muted{color:var(--muted);}
+    .tabs{display:flex; gap:6px; margin-top:8px;}
+    .tab{flex:1; text-align:center; padding:.6rem .5rem; border-radius:12px; border:1px solid var(--border); background:#0e1626; color:#cfe1ff; font-weight:600;}
+    .tab.active{background:#142038; border-color:#2a4170;}
+
+    .screen{flex:1; display:flex; flex-direction:column; padding:12px; gap:10px; min-height:0;}
     .hidden{display:none !important;}
+    .muted{color:var(--muted);}
 
-    /* screens */
-    .screen{flex:1 1 auto; display:flex; flex-direction:column; padding:14px; gap:10px; min-height:0;}
+    .intro h1{font-size:1.2rem;margin:0}
+    .name-row{display:flex; gap:8px; align-items:center;}
+    .name-input{flex:1; background:#0e1626; border:1px solid var(--border); color:var(--ink); border-radius:12px; padding:.8rem .9rem; font-size:1.05rem;}
+    .btn{border-radius:14px;}
+    .btn-start{padding:.85rem 1rem;}
 
-    /* Start screen (asks name) */
-    .intro h1{font-size:1.35rem; margin:0;}
-    .intro p{margin:.2rem 0;}
-    .name-box{display:flex; gap:10px; align-items:center;}
-    .name-input{
-      flex:1;
-      background:#0e1626; border:1px solid var(--border); color:var(--ink);
-      border-radius:12px; padding:.8rem .9rem; font-size:1.05rem;
-    }
-    .btn-start{font-size:1.05rem; padding:.9rem 1rem; border-radius:14px;}
+    .quiz-grid{flex:1; display:grid; grid-template-rows:auto 1fr auto; gap:10px; min-height:0;}
+    .playbar{display:flex; align-items:center; gap:8px;}
+    .btn-play{width:68px;height:68px;border-radius:50%;background:#0f1729;color:#e8f1ff;border:2px solid #22324f;display:flex;align-items:center;justify-content:center;font-size:1.15rem;}
+    .btn-fat{padding:.8rem 1rem;}
 
-    /* Quiz layout uses grid to always fit */
-    .quiz-grid{
-      flex:1 1 auto; min-height:0;
-      display:grid;
-      grid-template-rows: auto 1fr auto; /* playbar | choices | cta */
-      gap:10px;
-    }
-    .playbar{display:flex; align-items:center; gap:10px;}
-    .btn-play{
-      width:72px; height:72px; border-radius:50%;
-      background:#0f1729; color:#e8f1ff; border:2px solid #22324f;
-      display:flex; align-items:center; justify-content:center;
-      font-size:1.2rem; position:relative; flex:none;
-    }
-    .btn-play.pulse::after{
-      content:""; position:absolute; inset:-6px; border-radius:50%;
-      border:2px solid rgba(90,168,255,.35); animation:pulse 1.6s infinite;
-    }
-    @keyframes pulse{0%{opacity:.9;transform:scale(.95)}70%{opacity:0;transform:scale(1.18)}100%{opacity:0;transform:scale(1.18)}}
-    .btn-fat{font-size:1.05rem; padding:.85rem 1rem; border-radius:14px;}
-
-    /* Choices area fits: 2x2, cells stretch */
     .choices{
-      min-height:0;
-      display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:10px;
-      align-content:stretch; justify-content:stretch;
+      min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:10px;
     }
     .choice{
       display:flex; align-items:center; justify-content:center;
       border:2px solid #21304a; background:#0d1423; border-radius:16px;
       box-shadow:0 8px 24px rgba(0,0,0,.25);
-      font-weight:900; letter-spacing:.5px; text-align:center;
-      color:var(--num-color); text-shadow:0 1px 2px rgba(0,0,0,.85);
-      font-size:clamp(2rem, 9.5vw, 3rem);
-      padding:8px;
-      transition:transform .06s ease, border-color .2s ease, box-shadow .2s ease;
+      color:var(--num); text-shadow:0 1px 2px rgba(0,0,0,.85);
+      font-weight:900; letter-spacing:.4px; text-align:center;
+      font-size:clamp(1.9rem, 9vw, 2.8rem);
+      padding:8px; transition:transform .06s ease, border-color .2s ease, box-shadow .2s ease;
     }
     .choice:active{transform:scale(.985)}
     .choice.correct{border-color:var(--ok); box-shadow:0 0 0 3px rgba(34,197,94,.18) inset;}
     .choice.wrong{border-color:var(--bad); box-shadow:0 0 0 3px rgba(239,68,68,.18) inset;}
 
-    .toastbox{font-size:1rem; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:#0e1626;}
+    .cta{position:sticky; bottom:0; padding-top:6px; background:linear-gradient(180deg,transparent,rgba(11,15,22,.95)); padding-bottom:calc(6px + env(safe-area-inset-bottom));}
+    .btn-next{width:100%; padding:1rem 1rem; font-size:1.1rem;}
 
-    /* Sticky CTA sized to thumb & always visible */
-    .cta{
-      position:sticky; bottom:0; padding-top:6px; background:linear-gradient(180deg,transparent,rgba(11,15,22,.95));
-      padding-bottom:calc(6px + env(safe-area-inset-bottom));
-    }
-    .btn-next{ width:100%; font-size:1.2rem; padding:1rem 1rem; border-radius:16px; }
+    .toastbox{font-size:.98rem; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:#0e1626;}
+    .warn{color:#ffd466}
+
+    .row-compact{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+    .btn-mini{padding:.4rem .6rem; font-size:.85rem; border-radius:10px;}
   </style>
 </head>
 <body>
   <div class="app">
     <div class="card-app">
 
-      <!-- Header -->
+      <!-- HEADER -->
       <div class="hero">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <div class="d-flex align-items-center gap-2">
-            <span class="badge-pill" id="pillMode">Ready</span>
+          <div class="row-compact">
+            <span class="badge-pill" id="pillLevel">Level 1</span>
             <span class="badge-pill" id="pillCount">Done 0 / 40</span>
+            <span class="badge-pill" id="pillWarn" class="hidden" style="display:none">⚠️ Missing audio</span>
           </div>
-          <div class="text-end" style="font-size:1rem">
+          <div class="text-end" style="font-size:.95rem">
             <div class="muted">Unique Correct: <span id="liveScore">0</span></div>
           </div>
         </div>
         <div class="mt-2 progress-wrap"><div id="bar" class="progress-bar" style="width:0%"></div></div>
-      </div>
-
-      <!-- Start -->
-      <div class="screen intro" id="screenStart">
-        <div class="d-flex flex-column gap-3">
-          <div>
-            <h1>Number Trainer</h1>
-            <p>Hear a number → tap the correct one. Solve all <strong>40</strong>. Wrong ones repeat until correct.</p>
-          </div>
-
-          <div class="name-box">
-            <input id="nameInput" class="name-input" type="text" autocomplete="name"
-                   placeholder="Your full name" required>
-            <button class="btn btn-primary btn-start" id="btnStart" disabled>Start</button>
-          </div>
-
-          <p class="muted small m-0">Tip: your name is saved on this device for next time.</p>
+        <div class="tabs">
+          <button class="tab active" id="tabL1">Level 1</button>
+          <button class="tab" id="tabL2">Level 2</button>
+          <button class="tab" id="tabL3">Level 3</button>
         </div>
       </div>
 
-      <!-- Quiz -->
-      <div class="screen hidden" id="screenQuiz">
-        <div class="quiz-grid">
-          <!-- Playbar -->
-          <div class="playbar">
-            <button class="btn-play pulse" id="btnPlay" aria-label="Play audio">▶️</button>
-            <button class="btn btn-outline-light btn-fat" id="btnReplay" disabled>⟲ Replay</button>
-            <span class="muted ms-auto">Queue: <span id="queueLeft">40</span></span>
-          </div>
-
-          <!-- Choices -->
-          <div class="choices" id="choices"></div>
-
-          <!-- CTA -->
-          <div class="cta">
-            <div id="feedback" class="mb-2"></div>
-            <button class="btn btn-primary btn-next" id="btnNext" disabled>Next ➜</button>
+      <!-- BODY -->
+      <div class="screen" id="screen">
+        <!-- Start / Resume -->
+        <div id="paneStart">
+          <div class="intro">
+            <h1 id="title">Number Trainer — <span id="titleLevel">Level 1</span></h1>
+            <p class="muted mb-2" id="levelDesc"></p>
+            <div class="name-row mb-2">
+              <input id="nameInput" class="name-input" type="text" autocomplete="name" placeholder="Your full name" required>
+              <button class="btn btn-primary btn-start" id="btnStart" disabled>Start</button>
+            </div>
+            <div class="row-compact">
+              <button class="btn btn-outline-light btn-mini" id="btnResume" style="display:none">Resume</button>
+              <button class="btn btn-outline-warning btn-mini" id="btnReset" style="display:none">Reset Level</button>
+            </div>
+            <div class="muted small mt-2" id="availInfo"></div>
           </div>
         </div>
-        <audio id="player" preload="auto"></audio>
-      </div>
 
-      <!-- Done -->
-      <div class="screen hidden text-center" id="screenDone">
-        <h2 class="h4" style="font-size:1.3rem">Perfect! 🎉</h2>
-        <p class="muted" style="font-size:1.05rem">
-          All <strong>40</strong> correct. Total attempts: <strong><span id="attemptsTotal">0</span></strong>
-        </p>
-        <div class="small muted" id="breakdown"></div>
-        <div class="mt-2" style="padding-bottom:calc(env(safe-area-inset-bottom) + 6px)">
-          <button class="btn btn-success w-100" id="btnRetry">Try Again</button>
+        <!-- Quiz -->
+        <div id="paneQuiz" class="hidden">
+          <div class="quiz-grid">
+            <div class="playbar">
+              <button class="btn-play" id="btnPlay" aria-label="Play audio">▶️</button>
+              <button class="btn btn-outline-light btn-fat" id="btnReplay" disabled>⟲ Replay</button>
+              <span class="muted ms-auto">Queue: <span id="queueLeft">0</span></span>
+            </div>
+
+            <div class="choices" id="choices"></div>
+
+            <div class="cta">
+              <div id="feedback" class="mb-2"></div>
+              <button class="btn btn-primary btn-next" id="btnNext" disabled>Next ➜</button>
+            </div>
+          </div>
+          <audio id="player" preload="auto"></audio>
+        </div>
+
+        <!-- Done -->
+        <div id="paneDone" class="hidden text-center">
+          <h2 class="h5">Finished 🎉</h2>
+          <p class="muted">Attempts: <strong><span id="attemptsTotal">0</span></strong> — Score: <strong><span id="scorePct">0</span>%</strong></p>
+          <div class="small muted" id="breakdown"></div>
+          <div class="mt-2">
+            <button class="btn btn-success w-100" id="btnAgain">Do Again</button>
+          </div>
         </div>
       </div>
 
@@ -204,215 +171,372 @@
           crossorigin="anonymous"></script>
 
   <script>
-    /* ------- Hard-block zoom gestures ------- */
+    /* --------- NO ZOOM --------- */
     document.addEventListener('gesturestart', e => e.preventDefault());
     document.addEventListener('gesturechange', e => e.preventDefault());
     document.addEventListener('gestureend', e => e.preventDefault());
     window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive:false });
 
-    /* ------- Config: your Google Form field IDs ------- */
-    const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/formResponse";
-    const FIELD_NAME  = "entry.1894172247"; // name
-    const FIELD_SCORE = "entry.18818728";   // score (number)
-    const FIELD_IP    = "entry.361885690";  // IP
+    /* --------- CONFIG: Google Form (with Level field) --------- */
+    const FORM_URL   = "https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/formResponse";
+    const FIELD_NAME = "entry.1894172247"; // name
+    const FIELD_SCORE= "entry.18818728";   // score (number)
+    const FIELD_IP   = "entry.361885690";  // IP
+    const FIELD_LEVEL= "entry.64560435";   // Level_1 / Level_2 / Level_3 (or *_wip for checkpoint)
 
-    /* ------- Small helpers ------- */
+    /* --------- Level specs (target counts) --------- */
+    const LEVELS = {
+      L1: { label:"Level 1", key:"Level_1", desc:"30 × two-digit + 10 × one-digit", spec:[{d:2,c:30},{d:1,c:10}] },
+      L2: { label:"Level 2", key:"Level_2", desc:"10 × two-digit + 30 × three-digit", spec:[{d:2,c:10},{d:3,c:30}] },
+      L3: { label:"Level 3", key:"Level_3", desc:"Mix: 15 × three-digit + 15 × four-digit + 10 × five-digit", spec:[{d:3,c:15},{d:4,c:15},{d:5,c:10}] }
+    };
+
+    /* --------- Helpers --------- */
     const $ = (s, r=document)=>r.querySelector(s);
     const $$ = (s, r=document)=>[...r.querySelectorAll(s)];
-    const shuffle = (a)=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
+    const shuffle = (a)=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
     const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
 
-    /* ------- UI refs ------- */
+    /* --------- UI Refs --------- */
     const UI = {
-      start: $('#screenStart'), quiz: $('#screenQuiz'), done: $('#screenDone'),
-      nameInput: $('#nameInput'), btnStart: $('#btnStart'),
-      btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'), btnNext: $('#btnNext'), btnRetry: $('#btnRetry'),
-      player: $('#player'), choices: $('#choices'), feedback: $('#feedback'),
-      pillMode: $('#pillMode'), pillCount: $('#pillCount'), queueLeft: $('#queueLeft'),
-      liveScore: $('#liveScore'), bar: $('#bar'),
-      attemptsTotal: $('#attemptsTotal'), breakdown: $('#breakdown')
+      tabL1: $('#tabL1'), tabL2: $('#tabL2'), tabL3: $('#tabL3'),
+      pillLevel: $('#pillLevel'), pillCount: $('#pillCount'), pillWarn: $('#pillWarn'),
+      bar: $('#bar'), liveScore: $('#liveScore'),
+
+      paneStart: $('#paneStart'), paneQuiz: $('#paneQuiz'), paneDone: $('#paneDone'),
+      titleLevel: $('#titleLevel'), levelDesc: $('#levelDesc'), availInfo: $('#availInfo'),
+      nameInput: $('#nameInput'), btnStart: $('#btnStart'), btnResume: $('#btnResume'), btnReset: $('#btnReset'),
+
+      btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'), btnNext: $('#btnNext'),
+      player: $('#player'), choices: $('#choices'), feedback: $('#feedback'), queueLeft: $('#queueLeft'),
+
+      attemptsTotal: $('#attemptsTotal'), breakdown: $('#breakdown'), btnAgain: $('#btnAgain'), scorePct: $('#scorePct')
     };
 
-    const TOTAL_UNIQUE = 40;
-    const TARGET_COUNTS = {2:15, 3:15, 5:10};
+    /* --------- Profile (name, ip) --------- */
+    const STORE_KEY = "numtrainer_v3";
+    const profile = { name:"", ip:"unknown" };
 
-    /* ------- State ------- */
-    const state = {
-      queue: [],
-      completed: new Set(),
-      correctByDigits: {2:0,3:0,5:0},
-      attempts: 0,
-      studentName: "",
-      ip: "unknown",
-      submitted: false
-    };
-
-    /* ------- IP fetch (public IP) ------- */
-    (function fetchIP(){
-      fetch("https://api.ipify.org?format=json", {cache:"no-store"})
-        .then(r=>r.json())
-        .then(d=> state.ip = d.ip)
-        .catch(()=> state.ip = "unknown");
+    (function loadProfile(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+        if(saved?.profile?.name) profile.name = saved.profile.name;
+        if(saved?.profile?.ip) profile.ip = saved.profile.ip;
+        UI.nameInput.value = profile.name || "";
+        UI.btnStart.disabled = UI.nameInput.value.trim().length < 2;
+      }catch(_){}
+      fetch("https://api.ipify.org?format=json",{cache:"no-store"}).then(r=>r.json()).then(d=>{
+        profile.ip = d.ip; saveAll();
+      }).catch(()=>{});
     })();
 
-    /* ------- Start screen name handling ------- */
-    // preload from localStorage
-    const savedName = localStorage.getItem("numtrainer_name") || "";
-    if (savedName) {
-      UI.nameInput.value = savedName;
-      UI.btnStart.disabled = savedName.trim().length < 2;
-    }
-    UI.nameInput.addEventListener("input", () => {
+    UI.nameInput.addEventListener("input", ()=>{
       UI.btnStart.disabled = UI.nameInput.value.trim().length < 2;
     });
 
-    function setScreen(name){
-      UI.start.classList.toggle('hidden', name!=='start');
-      UI.quiz.classList.toggle('hidden', name!=='quiz');
-      UI.done.classList.toggle('hidden', name!=='done');
+    /* --------- Per-level state --------- */
+    let cur = { id:"L1", total:0 };
+    const state = {
+      L1: mkEmpty(), L2: mkEmpty(), L3: mkEmpty()
+    };
+    function mkEmpty(){
+      return { queue:[], completed:[], correctByDigits:{}, attempts:0, submitted:false, total:0, spec:[], _lastSubmittedAttempts:0 };
     }
 
-    function validateManifest(list){
-      const c2 = list.filter(x=>x.digits===2).length;
-      const c3 = list.filter(x=>x.digits===3).length;
-      const c5 = list.filter(x=>x.digits===5).length;
-      if(c2!==TARGET_COUNTS[2] || c3!==TARGET_COUNTS[3] || c5!==TARGET_COUNTS[5]){
-        alert(`Manifest counts invalid (2:${c2}, 3:${c3}, 5:${c5}). Rerun generator.`);
-        throw new Error('Bad manifest');
+    function saveAll(){
+      const blob = { profile, state };
+      localStorage.setItem(STORE_KEY, JSON.stringify(blob));
+    }
+    function loadAll(){
+      try{
+        const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+        if(saved?.state){
+          for(const k of ["L1","L2","L3"]){
+            if(saved.state[k]){
+              state[k] = Object.assign(mkEmpty(), saved.state[k]);
+              state[k].queue = Array.isArray(state[k].queue)? state[k].queue : [];
+              state[k].completed = Array.isArray(state[k].completed)? state[k].completed : [];
+              state[k].correctByDigits = state[k].correctByDigits || {};
+              state[k].attempts = Number(state[k].attempts||0);
+              state[k].submitted = !!state[k].submitted;
+              state[k].total = Number(state[k].total||0);
+              state[k].spec = Array.isArray(state[k].spec)? state[k].spec : [];
+              state[k]._lastSubmittedAttempts = Number(state[k]._lastSubmittedAttempts||0);
+            }
+          }
+        }
+      }catch(_){}
+    }
+    loadAll();
+
+    function setTab(activeId){
+      // auto-checkpoint submit BEFORE switching away
+      maybeSubmitCheckpoint(cur.id);
+
+      cur.id = activeId;
+      $$('.tab').forEach(t=>t.classList.remove('active'));
+      ({L1:UI.tabL1, L2:UI.tabL2, L3:UI.tabL3}[activeId]).classList.add('active');
+
+      UI.pillLevel.textContent = LEVELS[cur.id].label;
+      UI.titleLevel.textContent = LEVELS[cur.id].label;
+      UI.levelDesc.textContent = LEVELS[cur.id].desc;
+
+      const st = state[cur.id];
+      const haveProgress = st.queue.length>0 || st.completed.length>0;
+      UI.btnResume.style.display = haveProgress ? 'inline-block' : 'none';
+      UI.btnReset.style.display  = haveProgress ? 'inline-block' : 'none';
+      UI.btnStart.textContent = haveProgress ? 'Start New' : 'Start';
+
+      updateHeader();
+      showPane('start');
+      inspectAvailability();
+    }
+
+    function showPane(name){
+      UI.paneStart.classList.toggle('hidden', name!=='start');
+      UI.paneQuiz.classList.toggle('hidden',  name!=='quiz');
+      UI.paneDone.classList.toggle('hidden',  name!=='done');
+    }
+
+    function updateHeader(){
+      const st = state[cur.id];
+      UI.pillCount.textContent = `Done ${st.completed.length} / ${st.total||0}`;
+      UI.liveScore.textContent = st.completed.length;
+      UI.queueLeft.textContent = st.queue.length;
+      const p = st.total? Math.round((st.completed.length/st.total)*100) : 0;
+      UI.bar.style.width = p+'%';
+    }
+
+    function warnMissing(show){ UI.pillWarn.style.display = show ? '' : 'none'; }
+
+    /* --------- Build queue for level from MANIFEST --------- */
+    function selectPool(spec){
+      const byD = {};
+      (Array.isArray(MANIFEST)? MANIFEST : []).forEach(item=>{
+        (byD[item.digits] ||= []).push(item);
+      });
+      const availability = spec.map(s => ({ d:s.d, need:s.c, have:(byD[s.d]||[]).length }));
+      let missing = false;
+      const queue = [];
+      for(const a of availability){
+        const pool = byD[a.d] || [];
+        if(a.have < a.need){ missing = true; }
+        const pick = Math.min(a.need, pool.length);
+        const take = shuffle(pool.slice()).slice(0, pick);
+        queue.push(...take);
       }
+      warnMissing(missing);
+      return { queue: shuffle(queue), intendedTotal: spec.reduce((s,x)=>s+x.c,0), availability };
     }
 
-    function pctDone(){ return Math.round((state.completed.size / TOTAL_UNIQUE) * 100); }
+    function inspectAvailability(){
+      if(!Array.isArray(window.MANIFEST)){ UI.availInfo.textContent = 'Manifest missing. Run generator.'; return; }
+      const sel = selectPool(LEVELS[cur.id].spec);
+      const lines = sel.availability.map(a=>`${a.d}-digit: need ${a.need}, have ${a.have}`);
+      UI.availInfo.innerHTML = `<span class="${sel.availability.some(a=>a.have<a.need)?'warn':''}">Audio availability — ${lines.join(' · ')}</span>`;
+    }
 
-    function makeChoices(q){
-      const d=q.digits; let min,max;
-      if(d===2){min=10;max=99} else if(d===3){min=100;max=999} else {min=10000;max=99999}
-      const set=new Set([q.number]); while(set.size<4) set.add(rnd(min,max));
-      const arr=[...set];
-      for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
-      return arr;
+    /* --------- Start / Resume / Reset --------- */
+    UI.btnStart.addEventListener('click', ()=>{
+      profile.name = UI.nameInput.value.trim();
+      if(profile.name.length<2) return;
+      saveAll();
+
+      const sel = selectPool(LEVELS[cur.id].spec);
+      const st = state[cur.id] = mkEmpty();
+      st.queue = sel.queue.map(x=>x.number);
+      st.total = sel.intendedTotal;
+      st.spec  = LEVELS[cur.id].spec;
+      saveAll();
+
+      beginQuiz();
+    });
+
+    UI.btnResume.addEventListener('click', ()=>{
+      profile.name = UI.nameInput.value.trim();
+      saveAll();
+      if(state[cur.id].queue.length===0 && state[cur.id].completed.length === (state[cur.id].total||0)){
+        renderDone();
+        showPane('done');
+      }else{
+        beginQuiz(true);
+      }
+    });
+
+    UI.btnReset.addEventListener('click', ()=>{
+      state[cur.id] = mkEmpty();
+      saveAll();
+      setTab(cur.id);
+    });
+
+    /* --------- Quiz flow --------- */
+    UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
+    UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
+    UI.btnNext.addEventListener('click', ()=> renderQuestion());
+
+    function beginQuiz(resume=false){
+      showPane('quiz');
+      if(!resume) UI.feedback.innerHTML = '';
+      renderQuestion();
     }
 
     function renderQuestion(){
-      if(state.queue.length===0) return finish();
+      const st = state[cur.id];
+      if(st.queue.length===0){ renderDone(); return; }
 
-      const q = state.queue[0];
+      const n = st.queue[0];
+      const item = (MANIFEST||[]).find(x=>x.number===n);
+      const digits = String(n).length;
 
-      UI.pillMode.textContent = `${q.digits}-digit`;
-      UI.pillCount.textContent = `Done ${state.completed.size} / ${TOTAL_UNIQUE}`;
-      UI.queueLeft.textContent = state.queue.length;
-      UI.bar.style.width = `${pctDone()}%`;
+      UI.pillLevel.textContent = LEVELS[cur.id].label;
+      UI.pillCount.textContent = `Done ${st.completed.length} / ${st.total}`;
+      UI.queueLeft.textContent = st.queue.length;
+      UI.bar.style.width = (st.total? Math.round((st.completed.length/st.total)*100) : 0) + '%';
       UI.feedback.innerHTML = '';
       UI.btnNext.disabled = true; UI.btnReplay.disabled = true;
 
-      UI.player.src = q.file;
-      const p = UI.player.play(); if(p && p.catch) p.catch(()=>{});
+      UI.player.src = item?.file || '';
+      const pr = UI.player.play(); if(pr && pr.catch) pr.catch(()=>{});
       UI.btnReplay.disabled = false;
 
-      const nums = makeChoices(q);
       UI.choices.innerHTML = '';
-      nums.forEach(n=>{
-        const b=document.createElement('button');
+      const choices = makeChoices(digits, n);
+      choices.forEach(val=>{
+        const b = document.createElement('button');
         b.className='choice';
         b.type='button';
-        b.textContent=n;
-        b.onclick=()=>choose(b, n, q.number, q.digits);
+        b.textContent=val;
+        b.onclick=()=> choose(b, val, n, digits);
         UI.choices.appendChild(b);
       });
     }
 
+    function makeChoices(d, correct){
+      let min=0,max=9;
+      if(d===1){min=0;max=9}
+      else if(d===2){min=10;max=99}
+      else if(d===3){min=100;max=999}
+      else if(d===4){min=1000;max=9999}
+      else if(d===5){min=10000;max=99999}
+      const set = new Set([correct]);
+      while(set.size<4){ set.add(rnd(min,max)); }
+      return shuffle([...set]);
+    }
+
     function choose(btn, picked, correct, digits){
+      const st = state[cur.id];
       $$('.choice', UI.choices).forEach(x=>x.disabled=true);
-      state.attempts++;
+      st.attempts++;
 
       if(picked===correct){
         btn.classList.add('correct');
-        if(!state.completed.has(correct)){
-          state.completed.add(correct);
-          state.correctByDigits[digits] = (state.correctByDigits[digits]||0)+1;
+        if(!st.completed.includes(correct)){
+          st.completed.push(correct);
+          st.correctByDigits[digits] = (st.correctByDigits[digits]||0) + 1;
         }
         UI.feedback.innerHTML = '<div class="toastbox text-success">✅ Correct!</div>';
-        state.queue.shift(); // remove
-      } else {
+        st.queue.shift();
+      }else{
         btn.classList.add('wrong');
         const hit = $$('.choice', UI.choices).find(x=>Number(x.textContent)===correct);
         if(hit) hit.classList.add('correct');
-        UI.feedback.innerHTML = `<div class="toastbox text-danger">❌ Wrong. Will repeat later.</div>`;
-        const cur = state.queue.shift(); state.queue.push(cur); // move to end
+        UI.feedback.innerHTML = '<div class="toastbox text-danger">❌ Wrong. Will repeat later.</div>';
+        const curQ = st.queue.shift(); st.queue.push(curQ);
       }
+      saveAll();
 
-      UI.liveScore.textContent = state.completed.size;
-      UI.pillCount.textContent = `Done ${state.completed.size} / ${TOTAL_UNIQUE}`;
-      UI.queueLeft.textContent = state.queue.length;
-      UI.bar.style.width = `${pctDone()}%`;
-
+      updateHeader();
       UI.btnNext.disabled = false;
       UI.btnReplay.disabled = false;
     }
 
-    function nextQuestion(){
-      if(state.completed.size>=TOTAL_UNIQUE) return finish();
-      renderQuestion();
+    /* --------- Scores & Submissions --------- */
+    function levelTag(id){ return LEVELS[id].key; }                 // "Level_1"
+    function levelTagWip(id){ return LEVELS[id].key + "_wip"; }     // "Level_1_wip"
+    function computeAccuracy(st){ // for checkpoints while in progress
+      const done = st.completed.length;
+      return Math.max(0, Math.round( (done / Math.max(st.attempts, 1)) * 100 ));
+    }
+    function computeFinal(st){ // when finished
+      const tot = st.total || 1;
+      return Math.max(1, Math.round( (tot / Math.max(st.attempts, tot)) * 100 ));
     }
 
-    function finish(){
-      setScreen('done');
-      UI.attemptsTotal.textContent = state.attempts;
-      const b2 = `2-digit correct: <strong>${state.correctByDigits[2]||0}</strong> / ${TARGET_COUNTS[2]}`;
-      const b3 = `3-digit correct: <strong>${state.correctByDigits[3]||0}</strong> / ${TARGET_COUNTS[3]}`;
-      const b5 = `5-digit correct: <strong>${state.correctByDigits[5]||0}</strong> / ${TARGET_COUNTS[5]}`;
-      UI.breakdown.innerHTML = `${b2} &nbsp;•&nbsp; ${b3} &nbsp;•&nbsp; ${b5}`;
-      UI.bar.style.width = '100%';
+    function submitToForm({name, score, ip, level, checkpoint=false}){
+      try{
+        const params = new URLSearchParams();
+        params.set(FIELD_NAME,  name);
+        params.set(FIELD_SCORE, String(score));
+        params.set(FIELD_IP,    ip || "unknown");
+        params.set(FIELD_LEVEL, checkpoint ? levelTagWip(level) : levelTag(level));
 
-      // ---- AUTO SUBMIT (silent) ----
-      if (!state.submitted) {
-        state.submitted = true;
-        const scorePercent = Math.max(1, Math.round((TOTAL_UNIQUE / Math.max(state.attempts, TOTAL_UNIQUE)) * 100));
-        // Save & send
-        try {
-          const fd = new FormData();
-          fd.append(FIELD_NAME,  state.studentName);
-          fd.append(FIELD_SCORE, String(scorePercent));
-          fd.append(FIELD_IP,    state.ip || "unknown");
-          fetch(FORM_URL, { method: "POST", mode: "no-cors", body: fd })
-            .catch(()=>{}); // silent by design
-        } catch(_) {}
+        const body = new Blob([params.toString()], {type:"application/x-www-form-urlencoded;charset=UTF-8"});
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(FORM_URL, body);
+        } else {
+          fetch(FORM_URL, { method:"POST", mode:"no-cors", headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body: params.toString() }).catch(()=>{});
+        }
+      }catch(_){}
+    }
+
+    function maybeSubmitCheckpoint(id){
+      if(!id) return;
+      const st = state[id];
+      if(!st) return;
+      // only if there was activity and not already submitted this attempt count
+      if(st.attempts>0 && st.completed.length < (st.total||Infinity) && st.attempts !== st._lastSubmittedAttempts){
+        st._lastSubmittedAttempts = st.attempts;
+        const score = computeAccuracy(st);
+        submitToForm({ name: profile.name || "Anonymous", score, ip: profile.ip, level:id, checkpoint:true });
+        saveAll();
       }
     }
 
-    function startQuiz(){
-      // name gate
-      const name = UI.nameInput.value.trim();
-      if (name.length < 2) return;
-      state.studentName = name;
-      localStorage.setItem("numtrainer_name", name);
+    function renderDone(){
+      const st = state[cur.id];
+      showPane('done');
+      UI.attemptsTotal.textContent = st.attempts;
+      const score = computeFinal(st);
+      UI.scorePct.textContent = score;
 
+      const parts = [1,2,3,4,5].map(d => st.correctByDigits[d] ? `${d}-digit: <strong>${st.correctByDigits[d]}</strong>` : null).filter(Boolean);
+      UI.breakdown.innerHTML = parts.join(' · ') || '';
+
+      if(!st.submitted){
+        st.submitted = true;
+        submitToForm({ name: profile.name || "Anonymous", score, ip: profile.ip, level:cur.id, checkpoint:false });
+        saveAll();
+      }
+    }
+
+    UI.btnAgain.addEventListener('click', ()=>{
+      const sel = selectPool(LEVELS[cur.id].spec);
+      const st = state[cur.id] = mkEmpty();
+      st.queue = sel.queue.map(x=>x.number);
+      st.total = sel.intendedTotal;
+      st.spec  = LEVELS[cur.id].spec;
+      saveAll();
+      beginQuiz();
+    });
+
+    /* --------- Tabs --------- */
+    UI.tabL1.addEventListener('click', ()=> setTab('L1'));
+    UI.tabL2.addEventListener('click', ()=> setTab('L2'));
+    UI.tabL3.addEventListener('click', ()=> setTab('L3'));
+
+    /* --------- Page lifecycle: checkpoint on hide/reload --------- */
+    document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ maybeSubmitCheckpoint(cur.id); }});
+    window.addEventListener('pagehide', ()=>{ maybeSubmitCheckpoint(cur.id); });
+    window.addEventListener('beforeunload', ()=>{ maybeSubmitCheckpoint(cur.id); });
+
+    /* --------- Init --------- */
+    (function init(){
       if(!Array.isArray(window.MANIFEST)){
-        alert('Missing audio/manifest.js (must set window.MANIFEST). Run generate_audio.py.');
-        return;
+        alert('Missing audio/manifest.js (must set window.MANIFEST).');
       }
-      validateManifest(MANIFEST);
-      state.queue = shuffle([...MANIFEST]); // all 40
-      state.completed.clear();
-      state.correctByDigits = {2:0,3:0,5:0};
-      state.attempts = 0;
-      state.submitted = false;
-
-      UI.liveScore.textContent = '0';
-      UI.pillCount.textContent = 'Done 0 / 40';
-      UI.queueLeft.textContent = state.queue.length;
-      UI.bar.style.width = '0%';
-
-      setScreen('quiz');
-      renderQuestion();
-    }
-
-    // events
-    UI.btnStart.addEventListener('click', startQuiz);
-    UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
-    UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
-    UI.btnNext.addEventListener('click', nextQuestion);
-    UI.btnRetry?.addEventListener('click', ()=> setScreen('start'));
+      if(UI.nameInput.value.trim().length>=2) UI.btnStart.disabled=false;
+      setTab('L1');
+    })();
   </script>
 </body>
 </html>
