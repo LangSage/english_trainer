@@ -1,0 +1,69 @@
+<!doctype html>
+if(hit){ hit.classList.remove('btn-outline-light'); hit.classList.add('btn-success'); }
+}
+
+
+UI.score.textContent = state.score;
+const best = Number(localStorage.getItem('numtrainer_best')||'0');
+const nowPct = pct(state.score, TOTAL);
+if(nowPct>best){ localStorage.setItem('numtrainer_best', String(nowPct)); UI.best.textContent = String(nowPct); }
+
+
+UI.btnNext.disabled = false;
+UI.btnReveal.disabled = false;
+UI.btnReplay.disabled = false;
+}
+
+
+function nextQuestion(){
+if(state.qi < TOTAL-1){ state.qi++; renderQuestion(); }
+else { finish(); }
+}
+
+
+function reveal(){
+const q = state.questions[state.qi];
+UI.feedback.innerHTML = `<div class="muted">🔎 Reveal: <strong>${q.number}</strong></div>`;
+}
+
+
+function finish(){
+setScreen('done');
+UI.finalScore.textContent = state.score;
+const pctVal = pct(state.score, TOTAL);
+UI.finalPct.textContent = pctVal;
+const b2 = `2‑digit: <strong>${state.correctByDigits[2]||0}</strong> / 15`;
+const b3 = `3‑digit: <strong>${state.correctByDigits[3]||0}</strong> / 15`;
+const b5 = `5‑digit: <strong>${state.correctByDigits[5]||0}</strong> / 10`;
+UI.breakdown.innerHTML = `${b2} &nbsp;•&nbsp; ${b3} &nbsp;•&nbsp; ${b5}`;
+UI.bar.style.width = '100%';
+}
+
+
+function startQuiz(){
+const list = Array.isArray(MANIFEST) ? MANIFEST : [];
+validateManifest(list);
+state.questions = shuffle([...list]);
+state.qi = 0;
+state.score = 0;
+state.correctByDigits = {2:0,3:0,5:0};
+UI.score.textContent = '0';
+UI.best.textContent = localStorage.getItem('numtrainer_best')||'0';
+UI.bar.style.width = '0%';
+
+
+setScreen('quiz');
+renderQuestion();
+}
+
+
+// Events
+UI.btnStart.addEventListener('click', startQuiz);
+UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime = 0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled = false; });
+UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime = 0; UI.player.play().catch(()=>{}); });
+UI.btnNext.addEventListener('click', nextQuestion);
+UI.btnRetry.addEventListener('click', ()=>{ setScreen('start'); });
+UI.btnReveal.addEventListener('click', reveal);
+</script>
+</body>
+</html>
