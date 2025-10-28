@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <!-- PHONE: full page, no zoom -->
+  <!-- PHONE: fill screen, no zoom -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1,
                  user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Number Trainer — Phone 100% Fit</title>
+  <title>Number Trainer — Phone 100% Fit + Auto Submit</title>
 
   <!-- Bootstrap 5.0.2 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
@@ -18,11 +18,10 @@
 
   <style>
     :root{
-      /* balanced base for phones */
-      font-size: 18px;
+      font-size: 18px;  /* balanced phone size */
       --bg:#0b0f16; --card:#0f1523; --ink:#eef2f8; --muted:#a8b3c7; --border:#1e2a3f;
       --ok:#22c55e; --bad:#ef4444; --g1:#5aa8ff; --g2:#7bffca;
-      --num-color:#ffd400; /* change to #fff if you want white */
+      --num-color:#ffd400; /* change to #fff for white numbers */
     }
     *{ -webkit-tap-highlight-color: transparent; }
     html,body{
@@ -56,28 +55,31 @@
     }
     .progress-wrap{height:12px; border-radius:999px; overflow:hidden; background:#0c1220; border:1px solid var(--border);}
     .progress-bar{height:100%; background:linear-gradient(90deg,var(--g1),var(--g2)); transition:width .25s ease;}
+    .muted{color:var(--muted);}
+    .hidden{display:none !important;}
 
     /* screens */
     .screen{flex:1 1 auto; display:flex; flex-direction:column; padding:14px; gap:10px; min-height:0;}
-    .hidden{display:none !important;}
-    .muted{color:var(--muted);}
 
-    /* Start screen */
+    /* Start screen (asks name) */
     .intro h1{font-size:1.35rem; margin:0;}
     .intro p{margin:.2rem 0;}
+    .name-box{display:flex; gap:10px; align-items:center;}
+    .name-input{
+      flex:1;
+      background:#0e1626; border:1px solid var(--border); color:var(--ink);
+      border-radius:12px; padding:.8rem .9rem; font-size:1.05rem;
+    }
     .btn-start{font-size:1.05rem; padding:.9rem 1rem; border-radius:14px;}
 
-    /* Quiz screen uses grid to always fit 100% */
+    /* Quiz layout uses grid to always fit */
     .quiz-grid{
       flex:1 1 auto; min-height:0;
       display:grid;
       grid-template-rows: auto 1fr auto; /* playbar | choices | cta */
       gap:10px;
     }
-
-    .playbar{
-      display:flex; align-items:center; gap:10px;
-    }
+    .playbar{display:flex; align-items:center; gap:10px;}
     .btn-play{
       width:72px; height:72px; border-radius:50%;
       background:#0f1729; color:#e8f1ff; border:2px solid #22324f;
@@ -91,9 +93,9 @@
     @keyframes pulse{0%{opacity:.9;transform:scale(.95)}70%{opacity:0;transform:scale(1.18)}100%{opacity:0;transform:scale(1.18)}}
     .btn-fat{font-size:1.05rem; padding:.85rem 1rem; border-radius:14px;}
 
-    /* Choices area always fits: two rows, two cols, cells stretch */
+    /* Choices area fits: 2x2, cells stretch */
     .choices{
-      min-height:0; /* allow shrinking */
+      min-height:0;
       display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:10px;
       align-content:stretch; justify-content:stretch;
     }
@@ -101,7 +103,6 @@
       display:flex; align-items:center; justify-content:center;
       border:2px solid #21304a; background:#0d1423; border-radius:16px;
       box-shadow:0 8px 24px rgba(0,0,0,.25);
-      /* font scales with viewport but capped so it never overflows */
       font-weight:900; letter-spacing:.5px; text-align:center;
       color:var(--num-color); text-shadow:0 1px 2px rgba(0,0,0,.85);
       font-size:clamp(2rem, 9.5vw, 3rem);
@@ -119,9 +120,7 @@
       position:sticky; bottom:0; padding-top:6px; background:linear-gradient(180deg,transparent,rgba(11,15,22,.95));
       padding-bottom:calc(6px + env(safe-area-inset-bottom));
     }
-    .btn-next{
-      width:100%; font-size:1.2rem; padding:1rem 1rem; border-radius:16px;
-    }
+    .btn-next{ width:100%; font-size:1.2rem; padding:1rem 1rem; border-radius:16px; }
   </style>
 </head>
 <body>
@@ -144,12 +143,19 @@
 
       <!-- Start -->
       <div class="screen intro" id="screenStart">
-        <div class="d-flex flex-column gap-2">
+        <div class="d-flex flex-column gap-3">
           <div>
             <h1>Number Trainer</h1>
-            <p>Hear a number → tap the correct one. Get all <strong>40</strong> right. Wrong ones repeat until you nail them.</p>
+            <p>Hear a number → tap the correct one. Solve all <strong>40</strong>. Wrong ones repeat until correct.</p>
           </div>
-          <button class="btn btn-primary btn-start w-100" id="btnStart">Start</button>
+
+          <div class="name-box">
+            <input id="nameInput" class="name-input" type="text" autocomplete="name"
+                   placeholder="Your full name" required>
+            <button class="btn btn-primary btn-start" id="btnStart" disabled>Start</button>
+          </div>
+
+          <p class="muted small m-0">Tip: your name is saved on this device for next time.</p>
         </div>
       </div>
 
@@ -198,22 +204,29 @@
           crossorigin="anonymous"></script>
 
   <script>
-    /* block pinch/dbl-tap zoom without breaking taps */
+    /* ------- Hard-block zoom gestures ------- */
     document.addEventListener('gesturestart', e => e.preventDefault());
     document.addEventListener('gesturechange', e => e.preventDefault());
     document.addEventListener('gestureend', e => e.preventDefault());
     window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive:false });
 
+    /* ------- Config: your Google Form field IDs ------- */
+    const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/formResponse";
+    const FIELD_NAME  = "entry.1894172247"; // name
+    const FIELD_SCORE = "entry.18818728";   // score (number)
+    const FIELD_IP    = "entry.361885690";  // IP
+
+    /* ------- Small helpers ------- */
     const $ = (s, r=document)=>r.querySelector(s);
     const $$ = (s, r=document)=>[...r.querySelectorAll(s)];
     const shuffle = (a)=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
     const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
-    const vibrate = (p)=>{ if(navigator.vibrate){ try{ navigator.vibrate(p);}catch(_){} } };
 
+    /* ------- UI refs ------- */
     const UI = {
       start: $('#screenStart'), quiz: $('#screenQuiz'), done: $('#screenDone'),
-      btnStart: $('#btnStart'), btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'),
-      btnNext: $('#btnNext'), btnRetry: $('#btnRetry'),
+      nameInput: $('#nameInput'), btnStart: $('#btnStart'),
+      btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'), btnNext: $('#btnNext'), btnRetry: $('#btnRetry'),
       player: $('#player'), choices: $('#choices'), feedback: $('#feedback'),
       pillMode: $('#pillMode'), pillCount: $('#pillCount'), queueLeft: $('#queueLeft'),
       liveScore: $('#liveScore'), bar: $('#bar'),
@@ -223,12 +236,35 @@
     const TOTAL_UNIQUE = 40;
     const TARGET_COUNTS = {2:15, 3:15, 5:10};
 
+    /* ------- State ------- */
     const state = {
-      queue: [],              // all pending (objects from MANIFEST)
-      completed: new Set(),   // numbers solved correctly at least once
+      queue: [],
+      completed: new Set(),
       correctByDigits: {2:0,3:0,5:0},
-      attempts: 0
+      attempts: 0,
+      studentName: "",
+      ip: "unknown",
+      submitted: false
     };
+
+    /* ------- IP fetch (public IP) ------- */
+    (function fetchIP(){
+      fetch("https://api.ipify.org?format=json", {cache:"no-store"})
+        .then(r=>r.json())
+        .then(d=> state.ip = d.ip)
+        .catch(()=> state.ip = "unknown");
+    })();
+
+    /* ------- Start screen name handling ------- */
+    // preload from localStorage
+    const savedName = localStorage.getItem("numtrainer_name") || "";
+    if (savedName) {
+      UI.nameInput.value = savedName;
+      UI.btnStart.disabled = savedName.trim().length < 2;
+    }
+    UI.nameInput.addEventListener("input", () => {
+      UI.btnStart.disabled = UI.nameInput.value.trim().length < 2;
+    });
 
     function setScreen(name){
       UI.start.classList.toggle('hidden', name!=='start');
@@ -262,7 +298,6 @@
 
       const q = state.queue[0];
 
-      // header & progress
       UI.pillMode.textContent = `${q.digits}-digit`;
       UI.pillCount.textContent = `Done ${state.completed.size} / ${TOTAL_UNIQUE}`;
       UI.queueLeft.textContent = state.queue.length;
@@ -270,12 +305,10 @@
       UI.feedback.innerHTML = '';
       UI.btnNext.disabled = true; UI.btnReplay.disabled = true;
 
-      // audio
       UI.player.src = q.file;
       const p = UI.player.play(); if(p && p.catch) p.catch(()=>{});
       UI.btnReplay.disabled = false;
 
-      // choices
       const nums = makeChoices(q);
       UI.choices.innerHTML = '';
       nums.forEach(n=>{
@@ -299,18 +332,15 @@
           state.correctByDigits[digits] = (state.correctByDigits[digits]||0)+1;
         }
         UI.feedback.innerHTML = '<div class="toastbox text-success">✅ Correct!</div>';
-        vibrate(20);
-        state.queue.shift(); // remove from queue
+        state.queue.shift(); // remove
       } else {
         btn.classList.add('wrong');
         const hit = $$('.choice', UI.choices).find(x=>Number(x.textContent)===correct);
         if(hit) hit.classList.add('correct');
         UI.feedback.innerHTML = `<div class="toastbox text-danger">❌ Wrong. Will repeat later.</div>`;
-        vibrate([20,40,20]);
         const cur = state.queue.shift(); state.queue.push(cur); // move to end
       }
 
-      // update header
       UI.liveScore.textContent = state.completed.size;
       UI.pillCount.textContent = `Done ${state.completed.size} / ${TOTAL_UNIQUE}`;
       UI.queueLeft.textContent = state.queue.length;
@@ -333,9 +363,30 @@
       const b5 = `5-digit correct: <strong>${state.correctByDigits[5]||0}</strong> / ${TARGET_COUNTS[5]}`;
       UI.breakdown.innerHTML = `${b2} &nbsp;•&nbsp; ${b3} &nbsp;•&nbsp; ${b5}`;
       UI.bar.style.width = '100%';
+
+      // ---- AUTO SUBMIT (silent) ----
+      if (!state.submitted) {
+        state.submitted = true;
+        const scorePercent = Math.max(1, Math.round((TOTAL_UNIQUE / Math.max(state.attempts, TOTAL_UNIQUE)) * 100));
+        // Save & send
+        try {
+          const fd = new FormData();
+          fd.append(FIELD_NAME,  state.studentName);
+          fd.append(FIELD_SCORE, String(scorePercent));
+          fd.append(FIELD_IP,    state.ip || "unknown");
+          fetch(FORM_URL, { method: "POST", mode: "no-cors", body: fd })
+            .catch(()=>{}); // silent by design
+        } catch(_) {}
+      }
     }
 
     function startQuiz(){
+      // name gate
+      const name = UI.nameInput.value.trim();
+      if (name.length < 2) return;
+      state.studentName = name;
+      localStorage.setItem("numtrainer_name", name);
+
       if(!Array.isArray(window.MANIFEST)){
         alert('Missing audio/manifest.js (must set window.MANIFEST). Run generate_audio.py.');
         return;
@@ -345,6 +396,7 @@
       state.completed.clear();
       state.correctByDigits = {2:0,3:0,5:0};
       state.attempts = 0;
+      state.submitted = false;
 
       UI.liveScore.textContent = '0';
       UI.pillCount.textContent = 'Done 0 / 40';
@@ -356,11 +408,11 @@
     }
 
     // events
-    $('#btnStart').addEventListener('click', startQuiz);
-    $('#btnPlay').addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
-    $('#btnReplay').addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
-    $('#btnNext').addEventListener('click', nextQuestion);
-    $('#btnRetry').addEventListener('click', ()=> setScreen('start'));
+    UI.btnStart.addEventListener('click', startQuiz);
+    UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
+    UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
+    UI.btnNext.addEventListener('click', nextQuestion);
+    UI.btnRetry?.addEventListener('click', ()=> setScreen('start'));
   </script>
 </body>
 </html>
