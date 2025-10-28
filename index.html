@@ -22,6 +22,8 @@
       font-size: 19px;
       --bg:#0b0f16; --card:#0f1523; --ink:#eef2f8; --muted:#a8b3c7; --border:#1e2a3f;
       --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b; --g1:#5aa8ff; --g2:#7bffca;
+      /* <<< CHANGE THIS to #ffffff if you want white numbers instead of yellow >>> */
+      --num-color:#ffd400;
     }
     *{ -webkit-tap-highlight-color: transparent; }
     html,body{
@@ -29,17 +31,14 @@
       margin:0;
       background:var(--bg);
       color:var(--ink);
-      /* prevent iOS text auto-zoom */
       -webkit-text-size-adjust: 100%;
-      /* stop pull-to-refresh and overscroll bounce */
       overscroll-behavior: none;
-      /* reduce accidental gestures */
       touch-action: manipulation;
       user-select: none;
     }
     /* FULL HEIGHT APP */
     .app{
-      height:100svh; /* dynamic viewport for mobile */
+      height:100svh;
       width:100%;
       display:flex;
       flex-direction:column;
@@ -50,7 +49,7 @@
       flex-direction:column;
       height:100%;
       width:100%;
-      border-radius:0;                 /* edge-to-edge */
+      border-radius:0;
       background:
         radial-gradient(1200px 800px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
         radial-gradient(1000px 700px at 110% -10%, rgba(123,255,202,.10), transparent 40%),
@@ -74,7 +73,7 @@
       flex-direction:column;
       padding:16px;
       gap:12px;
-      overflow:hidden; /* contain to viewport */
+      overflow:hidden;
     }
     .intro h1{font-size:1.5rem; margin:0 0 .25rem;}
     .intro p{color:var(--muted); margin:0 0 .25rem;}
@@ -104,10 +103,13 @@
     }
     .choice{
       padding:18px; border-radius:18px; border:2px solid #21304a; background:#0d1423;
-      font-size:2.25rem; font-weight:800; letter-spacing:.5px; text-align:center;
+      font-size:2.4rem; font-weight:900; letter-spacing:.5px; text-align:center;
+      color:var(--num-color);               /* <<< BRIGHT NUMBER COLOR >>> */
+      text-shadow:0 1px 2px rgba(0,0,0,.85);/* extra contrast on any screen */
       box-shadow: 0 8px 26px rgba(0,0,0,.25);
       transition: transform .06s ease, border-color .2s ease, box-shadow .2s ease;
     }
+    .choice:disabled{ opacity:1; filter:none; } /* keep bright color even when disabled */
     .choice:active{transform:scale(.985)}
     .choice.correct{border-color:var(--ok); box-shadow:0 0 0 3px rgba(34,197,94,.18) inset;}
     .choice.wrong{border-color:var(--bad); box-shadow:0 0 0 3px rgba(239,68,68,.18) inset;}
@@ -131,7 +133,6 @@
     .donut .bg{stroke:#1f2a44;}
     .donut .fg{stroke-linecap:round;}
 
-    /* Make all buttons large & easy to tap */
     .btn{font-size:1.05rem; padding:.8rem 1rem; border-radius:14px;}
   </style>
 </head>
