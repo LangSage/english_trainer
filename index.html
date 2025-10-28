@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <!-- FULL-PAGE MOBILE, NO ZOOM -->
+  <!-- FULL-PAGE MOBILE. NO ZOOM. -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1,
                  user-scalable=no, viewport-fit=cover">
@@ -18,11 +18,11 @@
 
   <style>
     :root{
-      /* Bigger base font for phone */
-      font-size: 19px;
+      /* BIGGER base size for phones */
+      font-size: 20px;
       --bg:#0b0f16; --card:#0f1523; --ink:#eef2f8; --muted:#a8b3c7; --border:#1e2a3f;
-      --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b; --g1:#5aa8ff; --g2:#7bffca;
-      /* <<< CHANGE THIS to #ffffff if you want white numbers instead of yellow >>> */
+      --ok:#22c55e; --bad:#ef4444; --g1:#5aa8ff; --g2:#7bffca;
+      /* number color (switch to #fff if you want white) */
       --num-color:#ffd400;
     }
     *{ -webkit-tap-highlight-color: transparent; }
@@ -36,104 +36,88 @@
       touch-action: manipulation;
       user-select: none;
     }
+
     /* FULL HEIGHT APP */
     .app{
-      height:100svh;
-      width:100%;
-      display:flex;
-      flex-direction:column;
+      height:100svh; width:100%;
+      display:flex; flex-direction:column;
     }
     .card-app{
-      flex:1 1 auto;
-      display:flex;
-      flex-direction:column;
-      height:100%;
-      width:100%;
-      border-radius:0;
+      flex:1 1 auto; display:flex; flex-direction:column; height:100%; width:100%;
+      border-radius:0; border:0;
       background:
         radial-gradient(1200px 800px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
         radial-gradient(1000px 700px at 110% -10%, rgba(123,255,202,.10), transparent 40%),
         var(--card);
-      border:0;
     }
+
     .hero{
       padding:12px 16px calc(8px + env(safe-area-inset-top));
       border-bottom:1px solid var(--border);
     }
     .badge-pill{display:inline-flex; align-items:center; gap:.45rem;
-      padding:.35rem .7rem; border-radius:999px; font-size:.95rem;
+      padding:.45rem .8rem; border-radius:999px; font-size:1rem;
       background:#0e1422; border:1px solid #203049; color:#d1d9e7;}
-    .progress-wrap{height:14px; border-radius:999px; overflow:hidden;
+    .progress-wrap{height:16px; border-radius:999px; overflow:hidden;
       background:#0c1220; border:1px solid var(--border);}
     .progress-bar{height:100%; background:linear-gradient(90deg,var(--g1),var(--g2)); transition:width .25s ease;}
 
     .screen{
-      flex:1 1 auto;
-      display:flex;
-      flex-direction:column;
-      padding:16px;
-      gap:12px;
-      overflow:hidden;
+      flex:1 1 auto; display:flex; flex-direction:column; gap:14px;
+      padding:16px; overflow:hidden;
     }
-    .intro h1{font-size:1.5rem; margin:0 0 .25rem;}
-    .intro p{color:var(--muted); margin:0 0 .25rem;}
-    .intro ol{margin:.4rem 0 0 1.1rem}
-    .intro .btn-start{font-size:1.1rem; padding:1rem; border-radius:16px;}
+    .intro h1{font-size:1.6rem; margin:0;}
+    .intro p{color:var(--muted); margin:0;}
+    .intro .btn-start{font-size:1.2rem; padding:1.1rem 1.2rem; border-radius:18px;}
 
-    .row-flex{display:flex; flex-direction:column; gap:12px; min-height:0;}
-    .playbar{display:flex; align-items:center; gap:12px; flex:none;}
+    /* controls */
+    .row-flex{display:flex; flex-direction:column; gap:14px; min-height:0;}
+    .playbar{display:flex; align-items:center; gap:14px; flex:none;}
     .btn-play{
-      width:70px; height:70px; border-radius:50%;
-      background:#0f1729; color:#e8f1ff; border:2px solid #22324f;
+      width:84px; height:84px; border-radius:50%;
+      background:#0f1729; color:#e8f1ff; border:3px solid #22324f;
       display:flex; align-items:center; justify-content:center;
-      font-size:1.2rem; position:relative; flex:none;
+      font-size:1.6rem; position:relative; flex:none;
     }
     .btn-play.pulse::after{
-      content:""; position:absolute; inset:-8px; border-radius:50%;
+      content:""; position:absolute; inset:-10px; border-radius:50%;
       border:2px solid rgba(90,168,255,.35); animation:pulse 1.6s infinite;
     }
     @keyframes pulse{0%{opacity:.9;transform:scale(.95)}70%{opacity:0;transform:scale(1.18)}100%{opacity:0;transform:scale(1.18)}}
 
-    .switches{display:flex; gap:14px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:1rem;}
+    .btn-fat{ font-size:1.2rem; padding:1.05rem 1.2rem; border-radius:18px; }
+
+    .switches{display:flex; gap:16px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:1.05rem;}
     .divider{height:1px; background:var(--border);}
 
     .choices{
-      display:grid; grid-template-columns:1fr 1fr; gap:12px;
+      display:grid; grid-template-columns:1fr 1fr; gap:14px;
       min-height:0; overflow:auto; padding-bottom:8px;
     }
     .choice{
-      padding:18px; border-radius:18px; border:2px solid #21304a; background:#0d1423;
-      font-size:2.4rem; font-weight:900; letter-spacing:.5px; text-align:center;
-      color:var(--num-color);               /* <<< BRIGHT NUMBER COLOR >>> */
-      text-shadow:0 1px 2px rgba(0,0,0,.85);/* extra contrast on any screen */
-      box-shadow: 0 8px 26px rgba(0,0,0,.25);
+      padding:22px; border-radius:20px; border:3px solid #21304a; background:#0d1423;
+      font-size:3rem; font-weight:900; letter-spacing:.5px; text-align:center;
+      color:var(--num-color);
+      text-shadow:0 1px 2px rgba(0,0,0,.85);
+      box-shadow: 0 10px 28px rgba(0,0,0,.28);
       transition: transform .06s ease, border-color .2s ease, box-shadow .2s ease;
     }
-    .choice:disabled{ opacity:1; filter:none; } /* keep bright color even when disabled */
+    .choice:disabled{ opacity:1; filter:none; }
     .choice:active{transform:scale(.985)}
-    .choice.correct{border-color:var(--ok); box-shadow:0 0 0 3px rgba(34,197,94,.18) inset;}
-    .choice.wrong{border-color:var(--bad); box-shadow:0 0 0 3px rgba(239,68,68,.18) inset;}
+    .choice.correct{border-color:var(--ok); box-shadow:0 0 0 4px rgba(34,197,94,.18) inset;}
+    .choice.wrong{border-color:var(--bad); box-shadow:0 0 0 4px rgba(239,68,68,.18) inset;}
 
-    .toastbox{font-size:1.05rem; padding:12px 14px; border-radius:14px;
+    .toastbox{font-size:1.1rem; padding:12px 14px; border-radius:16px;
       border:1px solid var(--border); background:#0e1626;}
     .muted{color:var(--muted);}
     .hidden{display:none !important;}
 
     .sticky-cta{
-      position:sticky; bottom:0;
+      position:sticky; bottom:0; z-index:10; flex:none;
       background:linear-gradient(180deg,transparent,rgba(11,15,22,.96));
-      padding:10px 0 calc(8px + env(safe-area-inset-bottom));
-      z-index:10;
-      flex:none;
+      padding:12px 0 calc(10px + env(safe-area-inset-bottom));
     }
-    .btn-wide{flex:1; font-size:1.05rem; padding:.9rem 1rem; border-radius:14px;}
-
-    /* Result donut */
-    .donut{width:160px; height:160px;}
-    .donut .bg{stroke:#1f2a44;}
-    .donut .fg{stroke-linecap:round;}
-
-    .btn{font-size:1.05rem; padding:.8rem 1rem; border-radius:14px;}
+    .btn-next-big{ width:100%; font-size:1.3rem; padding:1.2rem 1.3rem; border-radius:20px; }
   </style>
 </head>
 <body>
@@ -145,11 +129,10 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
           <div class="d-flex align-items-center gap-2">
             <span class="badge-pill" id="pillMode">Ready</span>
-            <span class="badge-pill" id="pillCount">0 / 40</span>
+            <span class="badge-pill" id="pillCount">Done 0 / 40</span>
           </div>
-          <div class="text-end small" style="font-size:1rem">
-            <div class="muted">Best: <span id="bestPct">0</span>%</div>
-            <div class="muted">Score: <span id="liveScore">0</span></div>
+          <div class="text-end" style="font-size:1.05rem">
+            <div class="muted">Unique Correct: <span id="liveScore">0</span></div>
           </div>
         </div>
         <div class="mt-2 progress-wrap"><div id="bar" class="progress-bar" style="width:0%"></div></div>
@@ -160,13 +143,13 @@
         <div class="row-flex">
           <div>
             <h1>Number Trainer</h1>
-            <p>Hear a number → tap the correct one. 40 questions (15×2-digit, 15×3-digit, 10×5-digit). Works offline.</p>
+            <p>Hear a number → tap the correct one. You must get all <strong>40</strong> right. Wrong ones will repeat until correct.</p>
             <ol class="muted small">
               <li>Run <code>python generate_audio.py</code> (creates <code>audio/*.mp3</code> + <code>audio/manifest.js</code>).</li>
-              <li>Open this file on your phone (no server needed).</li>
+              <li>Open this file on your phone (offline; no server).</li>
             </ol>
           </div>
-          <button class="btn btn-primary btn-start w-100" id="btnStart">Start</button>
+          <button class="btn btn-primary btn-start w-100 btn-fat" id="btnStart">Start</button>
         </div>
       </div>
 
@@ -175,8 +158,8 @@
         <div class="row-flex">
           <div class="playbar">
             <button class="btn-play pulse" id="btnPlay" aria-label="Play audio">▶️</button>
-            <button class="btn btn-outline-light" id="btnReplay" disabled>⟲ Replay</button>
-            <span class="muted" style="margin-left:auto">Q <span id="qIdx">1</span> / 40</span>
+            <button class="btn btn-outline-light btn-fat" id="btnReplay" disabled>⟲ Replay</button>
+            <span class="muted" style="margin-left:auto">Queue: <span id="queueLeft">40</span></span>
           </div>
 
           <div class="switches">
@@ -197,42 +180,27 @@
           <div id="feedback"></div>
 
           <div class="sticky-cta">
-            <div class="d-flex gap-2">
-              <button class="btn btn-warning btn-wide" id="btnReveal" disabled>Reveal</button>
-              <button class="btn btn-primary btn-wide" id="btnNext" disabled>Next</button>
-            </div>
+            <button class="btn btn-primary btn-next-big" id="btnNext" disabled>Next ➜</button>
           </div>
         </div>
       </div>
 
       <!-- Done -->
       <div class="screen hidden text-center" id="screenDone">
-        <h2 class="h4" style="font-size:1.4rem">Finished 🎉</h2>
-        <div class="d-flex justify-content-center my-2">
-          <svg class="donut" viewBox="0 0 42 42" aria-label="Result">
-            <defs>
-              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#5aa8ff"/>
-                <stop offset="100%" stop-color="#7bffca"/>
-              </linearGradient>
-            </defs>
-            <circle class="bg" cx="21" cy="21" r="18" fill="none" stroke-width="4"/>
-            <circle class="fg" id="donutFg" cx="21" cy="21" r="18" fill="none" stroke="url(#grad)" stroke-width="4" stroke-dasharray="0 113"/>
-          </svg>
-        </div>
-        <p class="muted" style="font-size:1.1rem">
-          Score: <strong><span id="finalScore">0</span>/40</strong> — <strong><span id="finalPct">0</span>%</strong>
+        <h2 class="h4" style="font-size:1.5rem">Perfect! 🎉</h2>
+        <p class="muted" style="font-size:1.15rem">
+          All <strong>40</strong> correct. Total attempts: <strong><span id="attemptsTotal">0</span></strong>
         </p>
         <div class="small muted" id="breakdown" style="font-size:1.05rem"></div>
-        <div class="mt-2" style="padding-bottom:calc(env(safe-area-inset-bottom) + 6px)">
-          <button class="btn btn-success w-100" id="btnRetry">Try Again</button>
+        <div class="mt-2" style="padding-bottom:calc(env(safe-area-inset-bottom) + 8px)">
+          <button class="btn btn-success w-100 btn-fat" id="btnRetry">Try Again</button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- Offline manifest (generated by Python): must set window.MANIFEST -->
+  <!-- Manifest generated by Python (must define window.MANIFEST) -->
   <script src="audio/manifest.js"></script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -240,7 +208,7 @@
           crossorigin="anonymous"></script>
 
   <script>
-    // ======= HARD-BLOCK ZOOM (iOS/Android) =======
+    // ===== BLOCK ZOOM (pinch/dbl-tap/ctrl+wheel) =====
     document.addEventListener('gesturestart', e => e.preventDefault());
     document.addEventListener('gesturechange', e => e.preventDefault());
     document.addEventListener('gestureend', e => e.preventDefault());
@@ -252,29 +220,36 @@
       lastTouchEnd = now;
     }, { passive:false });
 
-    // ======= APP LOGIC =======
+    // ===== UTIL =====
     const $ = (s, r=document)=>r.querySelector(s);
     const $$ = (s, r=document)=>[...r.querySelectorAll(s)];
     const shuffle = (a)=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
     const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
-    const pct = (n,d)=>d?Math.round((n/d)*100):0;
     const vibrate = (p)=>{ if($('#haptics')?.checked && navigator.vibrate){ try{ navigator.vibrate(p);}catch(_){} } };
 
+    // ===== UI REFS =====
     const UI = {
       start: $('#screenStart'), quiz: $('#screenQuiz'), done: $('#screenDone'),
       btnStart: $('#btnStart'), btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'),
-      btnNext: $('#btnNext'), btnReveal: $('#btnReveal'), btnRetry: $('#btnRetry'),
+      btnNext: $('#btnNext'), btnRetry: $('#btnRetry'),
       player: $('#player'), choices: $('#choices'), feedback: $('#feedback'),
-      qIdx: $('#qIdx'), bar: $('#bar'), pillMode: $('#pillMode'), pillCount: $('#pillCount'),
-      liveScore: $('#liveScore'), bestPct: $('#bestPct'), finalScore: $('#finalScore'),
-      finalPct: $('#finalPct'), breakdown: $('#breakdown'), donutFg: $('#donutFg'),
+      pillMode: $('#pillMode'), pillCount: $('#pillCount'), queueLeft: $('#queueLeft'),
+      liveScore: $('#liveScore'), bar: $('#bar'),
+      attemptsTotal: $('#attemptsTotal'), breakdown: $('#breakdown'),
       autoPlay: $('#autoPlay')
     };
 
-    const TOTAL = 40, COUNTS = {2:15, 3:15, 5:10};
+    const TOTAL_UNIQUE = 40;
+    const TARGET_COUNTS = {2:15, 3:15, 5:10};
 
+    // ===== STATE =====
     const state = {
-      list: [], qi: 0, score: 0, answered:false, correctByDigits:{2:0,3:0,5:0}
+      queue: [],              // active question queue (objects)
+      completed: new Set(),   // numbers answered correctly at least once
+      correctByDigits: {2:0,3:0,5:0},
+      attempts: 0,
+      answered: false,        // current question answered?
+      current: null
     };
 
     function setScreen(name){
@@ -287,31 +262,44 @@
       const c2 = list.filter(x=>x.digits===2).length;
       const c3 = list.filter(x=>x.digits===3).length;
       const c5 = list.filter(x=>x.digits===5).length;
-      if(c2!==COUNTS[2] || c3!==COUNTS[3] || c5!==COUNTS[5]){
+      if(c2!==TARGET_COUNTS[2] || c3!==TARGET_COUNTS[3] || c5!==TARGET_COUNTS[5]){
         alert(`Manifest counts invalid (2:${c2}, 3:${c3}, 5:${c5}). Rerun generator.`);
         throw new Error('Bad manifest');
       }
+    }
+
+    function pctDone(){
+      return Math.round((state.completed.size / TOTAL_UNIQUE) * 100);
     }
 
     function makeChoices(q){
       const d=q.digits; let min,max;
       if(d===2){min=10;max=99} else if(d===3){min=100;max=999} else {min=10000;max=99999}
       const set=new Set([q.number]); while(set.size<4) set.add(rnd(min,max));
-      return shuffle([...set]);
+      const arr = [...set];
+      // ensure shuffle so correct isn't always first
+      for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+      return arr;
     }
 
     function renderQuestion(){
-      const q = state.list[state.qi];
-      UI.pillMode.textContent = `${q.digits}-digit`;
-      UI.pillCount.textContent = `${state.qi+1} / ${TOTAL}`;
-      UI.qIdx && (UI.qIdx.textContent = String(state.qi+1));
-      UI.bar.style.width = `${pct(state.qi, TOTAL)}%`;
-      UI.feedback.innerHTML = '';
-      UI.btnNext.disabled = true; UI.btnReveal.disabled = true; UI.btnReplay.disabled = true;
+      if (state.queue.length === 0) { return finish(); }
+
+      const q = state.queue[0];
+      state.current = q;
       state.answered = false;
 
+      UI.pillMode.textContent = `${q.digits}-digit`;
+      UI.pillCount.textContent = `Done ${state.completed.size} / ${TOTAL_UNIQUE}`;
+      UI.queueLeft.textContent = state.queue.length;
+      UI.bar.style.width = `${pctDone()}%`;
+      UI.feedback.innerHTML = '';
+      UI.btnNext.disabled = true; UI.btnReplay.disabled = true;
+
+      // audio
       UI.player.src = q.file;
 
+      // choices
       const nums = makeChoices(q);
       UI.choices.innerHTML = '';
       nums.forEach(n=>{
@@ -323,70 +311,65 @@
         UI.choices.appendChild(b);
       });
 
-      autoPlayCurrent();
-    }
-
-    function autoPlayCurrent(){
-      if(!UI.autoPlay.checked) return;
-      UI.player.currentTime = 0;
-      const p = UI.player.play();
-      if(p && p.catch) p.catch(()=>{});
-      UI.btnReplay.disabled = false;
+      // auto-play (after user gesture Start/Next)
+      if (UI.autoPlay.checked) {
+        const p = UI.player.play();
+        if(p && p.catch) p.catch(()=>{});
+        UI.btnReplay.disabled = false;
+      }
     }
 
     function choose(btn, picked, correct, digits){
       if(state.answered) return;
       state.answered = true;
+      state.attempts++;
       $$('.choice', UI.choices).forEach(x=>x.disabled=true);
 
       if(picked===correct){
         btn.classList.add('correct');
-        state.score++;
-        state.correctByDigits[digits] = (state.correctByDigits[digits]||0)+1;
+        // Mark unique completion if first time correct
+        if (!state.completed.has(correct)) {
+          state.completed.add(correct);
+          state.correctByDigits[digits] = (state.correctByDigits[digits]||0) + 1;
+        }
         UI.feedback.innerHTML = '<div class="toastbox text-success">✅ Correct!</div>';
         vibrate(20);
-      }else{
+
+        // Remove current from queue (do NOT re-add)
+        state.queue.shift();
+
+      } else {
         btn.classList.add('wrong');
         const hit = $$('.choice', UI.choices).find(x=>Number(x.textContent)===correct);
         if(hit) hit.classList.add('correct');
-        UI.feedback.innerHTML = `<div class="toastbox text-danger">❌ Wrong. Correct: <strong>${correct}</strong></div>`;
+        UI.feedback.innerHTML = `<div class="toastbox text-danger">❌ Wrong. It will repeat later.</div>`;
         vibrate([20,40,20]);
+
+        // Move current to the END of queue
+        const cur = state.queue.shift();
+        state.queue.push(cur);
       }
 
-      UI.liveScore.textContent = state.score;
-      const nowPct = pct(state.score, TOTAL);
-      const best = Number(localStorage.getItem('numtrainer_best')||'0');
-      if(nowPct>best){ localStorage.setItem('numtrainer_best', String(nowPct)); UI.bestPct.textContent = String(nowPct); }
+      UI.liveScore.textContent = state.completed.size;
+      UI.pillCount.textContent = `Done ${state.completed.size} / ${TOTAL_UNIQUE}`;
+      UI.queueLeft.textContent = state.queue.length;
+      UI.bar.style.width = `${pctDone()}%`;
 
       UI.btnNext.disabled = false;
-      UI.btnReveal.disabled = false;
       UI.btnReplay.disabled = false;
     }
 
     function nextQuestion(){
-      if(state.qi < TOTAL-1){ state.qi++; renderQuestion(); }
-      else { finish(); }
-    }
-
-    function reveal(){
-      const q = state.list[state.qi];
-      UI.feedback.innerHTML = `<div class="toastbox">🔎 Reveal: <strong>${q.number}</strong></div>`;
-    }
-
-    function setDonut(p){
-      const CIRC = 2*Math.PI*18;
-      const filled = Math.max(0, Math.min(CIRC, CIRC*(p/100)));
-      UI.donutFg.setAttribute('stroke-dasharray', `${filled} ${CIRC}`);
+      if (state.completed.size >= TOTAL_UNIQUE) { return finish(); }
+      renderQuestion();
     }
 
     function finish(){
       setScreen('done');
-      UI.finalScore.textContent = state.score;
-      const p = pct(state.score, TOTAL); UI.finalPct.textContent = p;
-      setDonut(p);
-      const b2 = `2-digit: <strong>${state.correctByDigits[2]||0}</strong> / ${COUNTS[2]}`;
-      const b3 = `3-digit: <strong>${state.correctByDigits[3]||0}</strong> / ${COUNTS[3]}`;
-      const b5 = `5-digit: <strong>${state.correctByDigits[5]||0}</strong> / ${COUNTS[5]}`;
+      UI.attemptsTotal.textContent = state.attempts;
+      const b2 = `2-digit correct: <strong>${state.correctByDigits[2]||0}</strong> / ${TARGET_COUNTS[2]}`;
+      const b3 = `3-digit correct: <strong>${state.correctByDigits[3]||0}</strong> / ${TARGET_COUNTS[3]}`;
+      const b5 = `5-digit correct: <strong>${state.correctByDigits[5]||0}</strong> / ${TARGET_COUNTS[5]}`;
       UI.breakdown.innerHTML = `${b2} &nbsp;•&nbsp; ${b3} &nbsp;•&nbsp; ${b5}`;
       UI.bar.style.width = '100%';
     }
@@ -397,23 +380,27 @@
         return;
       }
       validateManifest(MANIFEST);
-      state.list = shuffle([...MANIFEST]);
-      state.qi = 0; state.score = 0; state.answered = false;
+
+      state.queue = shuffle([...MANIFEST]);   // start with all 40
+      state.completed.clear();
       state.correctByDigits = {2:0,3:0,5:0};
+      state.attempts = 0;
+
       UI.liveScore.textContent = '0';
-      UI.bestPct.textContent = localStorage.getItem('numtrainer_best')||'0';
+      UI.pillCount.textContent = 'Done 0 / 40';
+      UI.queueLeft.textContent = state.queue.length;
       UI.bar.style.width = '0%';
+
       setScreen('quiz');
       renderQuestion();
     }
 
     // Events
-    UI.btnStart.addEventListener('click', startQuiz);
-    UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
-    UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
-    UI.btnNext.addEventListener('click', nextQuestion);
-    UI.btnReveal.addEventListener('click', reveal);
-    UI.btnRetry.addEventListener('click', ()=> setScreen('start'));
+    $('#btnStart').addEventListener('click', startQuiz);
+    $('#btnPlay').addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
+    $('#btnReplay').addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
+    $('#btnNext').addEventListener('click', nextQuestion);
+    $('#btnRetry').addEventListener('click', ()=> setScreen('start'));
   </script>
 </body>
 </html>
