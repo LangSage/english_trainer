@@ -2,54 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Number Trainer — 40Q (Offline)</title>
-  <!-- Bootstrap 5.0.2 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Number Trainer — Phone (Offline, Auto-Play)</title>
+
+  <!-- Bootstrap 5.0.2 (as requested) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+        crossorigin="anonymous">
+
   <style>
     :root{
-      --bg:#0b0f16; --card:#111827; --border:#1e293b; --muted:#9aa5b4; --txt:#e6e8ec; --accent:#5aa8ff; --accent2:#7bffca; --success:#22c55e; --danger:#ef4444; --warning:#f59e0b;
+      --bg:#0b0f16; --card:#101724; --ink:#e8ecf3; --muted:#97a4b7; --border:#1e2a3f;
+      --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b; --g1:#5aa8ff; --g2:#7bffca;
     }
-    html, body { height:100%; background:var(--bg); color:var(--txt); }
-    .app { min-height:100%; display:flex; align-items:center; justify-content:center; padding:12px; }
-    .card-app{ width:100%; max-width:720px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.00)), var(--card); border:1px solid var(--border); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,.35); overflow:hidden; }
-    .hero{ position:relative; border-bottom:1px solid var(--border); padding:16px; background: radial-gradient(1200px 1200px at -10% -30%, rgba(90,168,255,.15), transparent 40%), radial-gradient(1000px 900px at 120% -20%, rgba(123,255,202,.12), transparent 40%); }
-    .badge-pill{ display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:999px; font-size:.85rem; background:#0e1624; color:#b7c2d3; border:1px solid #203049; }
-    .progress-wrap{ height:12px; background:#0f1725; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
-    .progress-bar{ height:100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .25s ease; }
+    html,body{height:100%; background:var(--bg); color:var(--ink);}
+    body{margin:0;}
+    .app{min-height:100%; display:flex; align-items:center; justify-content:center; padding:10px;}
+    .card-app{
+      width:100%; max-width:720px; border-radius:22px; overflow:hidden;
+      background: radial-gradient(1200px 800px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
+                  radial-gradient(1000px 700px at 110% -10%, rgba(123,255,202,.10), transparent 40%),
+                  var(--card);
+      border:1px solid var(--border);
+      box-shadow: 0 30px 80px rgba(0,0,0,.35);
+    }
+    .hero{
+      padding:14px 16px; border-bottom:1px solid var(--border);
+      backdrop-filter: blur(2px);
+    }
+    .badge-pill{display:inline-flex; align-items:center; gap:.45rem;
+      padding:.25rem .6rem; border-radius:999px; font-size:.85rem;
+      background:#0f1626; border:1px solid #203049; color:#c7d2e4;}
+    .progress-wrap{height:12px; border-radius:999px; overflow:hidden;
+      background:#0e1523; border:1px solid var(--border);}
+    .progress-bar{height:100%; background:linear-gradient(90deg,var(--g1),var(--g2)); transition:width .25s ease;}
 
-    .playpad{ display:flex; align-items:center; gap:12px; margin-top:10px; }
-    .btn-play{ width:64px; height:64px; border-radius:50%; border:2px solid #243047; background:#0f1725; color:#cfe1ff; font-size:1.05rem; display:flex; align-items:center; justify-content:center; position:relative; }
-    .btn-play.pulse::after{ content:""; position:absolute; inset:-6px; border-radius:50%; border:2px solid rgba(90,168,255,.35); animation:pulse 1.6s infinite; }
-    @keyframes pulse{ 0%{opacity:.9; transform:scale(.95);} 70%{opacity:0; transform:scale(1.2);} 100%{opacity:0; transform:scale(1.2);} }
+    .screen{padding:16px;}
+    .intro h1{font-size:1.25rem; margin-bottom:.25rem;}
+    .intro p{color:var(--muted); margin-bottom:.5rem;}
+    .intro .btn-start{font-size:1.05rem; padding:.9rem 1rem; border-radius:14px;}
 
-    .choices{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
-    .choice{ border:2px solid #223049; background:#0f1524; color:var(--txt); padding:16px; border-radius:14px; font-size:1.7rem; font-weight:600; box-shadow:0 4px 18px rgba(0,0,0,.25); transition:transform .07s ease, border-color .2s ease; }
-    .choice:active{ transform:scale(.985); }
-    .choice.correct{ border-color: var(--success); box-shadow:0 0 0 3px rgba(34,197,94,.18) inset; }
-    .choice.wrong{ border-color: var(--danger); box-shadow:0 0 0 3px rgba(239,68,68,.18) inset; }
+    .playbar{display:flex; align-items:center; gap:10px;}
+    .btn-play{
+      width:62px; height:62px; border-radius:50%;
+      background:#0f1729; color:#d9e7ff; border:2px solid #22324f;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.1rem; position:relative;
+    }
+    .btn-play.pulse::after{
+      content:""; position:absolute; inset:-6px; border-radius:50%;
+      border:2px solid rgba(90,168,255,.35); animation:pulse 1.6s infinite;
+    }
+    @keyframes pulse{0%{opacity:.9;transform:scale(.95)}70%{opacity:0;transform:scale(1.2)}100%{opacity:0;transform:scale(1.2)}}
 
-    .muted{ color:var(--muted); }
-    .hidden{ display:none !important; }
-    .divider{ height:1px; background:var(--border); margin:14px 0; }
+    .switches{display:flex; gap:12px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:.92rem;}
+    .divider{height:1px; background:var(--border); margin:12px 0;}
 
-    .toolbar{ display:flex; gap:10px; }
-    .btn-wide{ flex:1; }
+    .choices{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .choice{
+      padding:16px; border-radius:16px; border:2px solid #21304a; background:#0d1423;
+      font-size:1.8rem; font-weight:700; letter-spacing:.5px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      transition: transform .06s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .choice:active{transform:scale(.985)}
+    .choice.correct{border-color:var(--ok); box-shadow:0 0 0 3px rgba(34,197,94,.18) inset;}
+    .choice.wrong{border-color:var(--bad); box-shadow:0 0 0 3px rgba(239,68,68,.18) inset;}
 
-    .toastbox{ font-size:.95rem; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0e1624; }
+    .toastbox{font-size:.98rem; padding:10px 12px; border-radius:12px;
+      border:1px solid var(--border); background:#0e1626;}
+    .muted{color:var(--muted);}
+    .hidden{display:none !important;}
+
+    .sticky-cta{position:sticky; bottom:0; background:linear-gradient(180deg,transparent,rgba(11,15,22,.95));
+      padding-top:10px;}
+    .btn-wide{flex:1;}
 
     /* Result donut */
-    .donut{ width:140px; height:140px; }
-    .donut .bg{ stroke:#1f2a44; }
-    .donut .fg{ stroke:url(#grad); transition:stroke-dasharray .4s ease; }
+    .donut{width:140px; height:140px;}
+    .donut .bg{stroke:#1f2a44;}
+    .donut .fg{stroke-linecap:round;}
 
-    /* Sticky footer on mobile */
-    .sticky-cta{ position:sticky; bottom:0; left:0; right:0; background:linear-gradient(180deg, transparent, rgba(11,15,22,.9)); padding-top:10px; }
+    /* Thumb reach helpers on phones */
+    .pad-bottom{padding-bottom: 18px;}
   </style>
 </head>
 <body>
   <div class="app">
     <div class="card-app">
+
+      <!-- Header -->
       <div class="hero">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
           <div class="d-flex align-items-center gap-2">
@@ -64,39 +107,55 @@
         <div class="mt-2 progress-wrap"><div id="bar" class="progress-bar" style="width:0%"></div></div>
       </div>
 
-      <div class="p-3 p-md-4" id="screenStart">
-        <h1 class="h4 mb-2">Number Trainer</h1>
-        <p class="muted">Hear the number → pick the right one. Exactly 40 questions (15×2‑digit, 15×3‑digit, 10×5‑digit). Works offline.</p>
-        <ol class="muted small mb-3">
-          <li>Run <code>python generate_audio.py</code> to create <code>audio/</code> files + <code>audio/manifest.js</code>.</li>
-          <li>Open this file directly. No server needed.</li>
+      <!-- Start -->
+      <div class="screen intro" id="screenStart">
+        <h1>Number Trainer</h1>
+        <p>Hear a number → tap the correct one. Exactly 40 questions (15×2-digit, 15×3-digit, 10×5-digit). Works offline.</p>
+        <ol class="muted small">
+          <li>Generate audio with <code>python generate_audio.py</code> (creates <code>audio/*.mp3</code> + <code>audio/manifest.js</code>).</li>
+          <li>Open this file on your phone (no server needed).</li>
         </ol>
-        <button class="btn btn-primary btn-lg w-100" id="btnStart">Start</button>
+        <button class="btn btn-primary btn-lg w-100 btn-start" id="btnStart">Start</button>
       </div>
 
-      <div class="p-3 p-md-4 hidden" id="screenQuiz">
-        <div class="playpad">
-          <button class="btn-play pulse" id="btnPlay" aria-label="Play audio">▶️</button>
-          <button class="btn btn-outline-light" id="btnReplay" disabled>⟲ Replay</button>
-          <span class="small muted">Q <span id="qIdx">1</span> / 40</span>
-        </div>
-        <audio id="player" preload="auto"></audio>
+      <!-- Quiz -->
+      <div class="screen hidden pad-bottom" id="screenQuiz">
+        <div class="d-flex flex-column gap-2">
 
-        <div class="divider"></div>
+          <div class="playbar">
+            <button class="btn-play pulse" id="btnPlay" aria-label="Play audio">▶️</button>
+            <button class="btn btn-outline-light" id="btnReplay" disabled>⟲ Replay</button>
+            <span class="small muted">Q <span id="qIdx">1</span> / 40</span>
+          </div>
 
-        <div class="choices" id="choices"></div>
+          <div class="switches">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="autoPlay" checked>
+              <label class="form-check-label" for="autoPlay">Auto-play question</label>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="haptics" checked>
+              <label class="form-check-label" for="haptics">Haptic feedback</label>
+            </div>
+          </div>
 
-        <div class="mt-3" id="feedback"></div>
+          <audio id="player" preload="auto"></audio>
+          <div class="divider"></div>
 
-        <div class="sticky-cta pt-2">
-          <div class="toolbar">
-            <button class="btn btn-warning btn-wide" id="btnReveal" disabled>Reveal</button>
-            <button class="btn btn-primary btn-wide" id="btnNext" disabled>Next</button>
+          <div class="choices" id="choices"></div>
+          <div class="mt-2" id="feedback"></div>
+
+          <div class="sticky-cta">
+            <div class="d-flex gap-2">
+              <button class="btn btn-warning btn-wide" id="btnReveal" disabled>Reveal</button>
+              <button class="btn btn-primary btn-wide" id="btnNext" disabled>Next</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="p-4 hidden text-center" id="screenDone">
+      <!-- Done -->
+      <div class="screen hidden text-center" id="screenDone">
         <h2 class="h4">Finished 🎉</h2>
         <div class="d-flex justify-content-center my-2">
           <svg class="donut" viewBox="0 0 42 42" aria-label="Result">
@@ -106,8 +165,8 @@
                 <stop offset="100%" stop-color="#7bffca"/>
               </linearGradient>
             </defs>
-            <circle class="bg" cx="21" cy="21" r="18" fill="none" stroke-width="4" />
-            <circle class="fg" id="donutFg" cx="21" cy="21" r="18" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 113" />
+            <circle class="bg" cx="21" cy="21" r="18" fill="none" stroke-width="4"/>
+            <circle class="fg" id="donutFg" cx="21" cy="21" r="18" fill="none" stroke="url(#grad)" stroke-width="4" stroke-dasharray="0 113"/>
           </svg>
         </div>
         <p class="muted">Score: <strong><span id="finalScore">0</span>/40</strong> — <strong><span id="finalPct">0</span>%</strong></p>
@@ -116,36 +175,42 @@
           <button class="btn btn-success btn-lg w-100" id="btnRetry">Try Again</button>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- Offline manifest (generated by Python) -->
+  <!-- Offline manifest (generated by Python): must expose window.MANIFEST -->
   <script src="audio/manifest.js"></script>
-  <!-- Bootstrap 5.0.2 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+          crossorigin="anonymous"></script>
 
   <script>
-    // ---- Utilities
-    const $ = (s, r=document) => r.querySelector(s);
-    const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+    // -------- Utils
+    const $ = (s, r=document)=>r.querySelector(s);
+    const $$ = (s, r=document)=>[...r.querySelectorAll(s)];
     const shuffle = (a)=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
     const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
-    const pct = (n,d)=> d? Math.round((n/d)*100):0;
+    const pct = (n,d)=>d?Math.round((n/d)*100):0;
+    const vibrate = (p)=>{ if($('#haptics').checked && navigator.vibrate){ try{ navigator.vibrate(p);}catch(_){} } };
 
-    // ---- UI refs
+    // -------- UI refs
     const UI = {
       start: $('#screenStart'), quiz: $('#screenQuiz'), done: $('#screenDone'),
-      play: $('#btnPlay'), replay: $('#btnReplay'), next: $('#btnNext'), reveal: $('#btnReveal'), retry: $('#btnRetry'),
+      btnStart: $('#btnStart'), btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'),
+      btnNext: $('#btnNext'), btnReveal: $('#btnReveal'), btnRetry: $('#btnRetry'),
       player: $('#player'), choices: $('#choices'), feedback: $('#feedback'),
       qIdx: $('#qIdx'), bar: $('#bar'), pillMode: $('#pillMode'), pillCount: $('#pillCount'),
-      liveScore: $('#liveScore'), bestPct: $('#bestPct'), finalScore: $('#finalScore'), finalPct: $('#finalPct'), breakdown: $('#breakdown'), donutFg: $('#donutFg')
+      liveScore: $('#liveScore'), bestPct: $('#bestPct'), finalScore: $('#finalScore'),
+      finalPct: $('#finalPct'), breakdown: $('#breakdown'), donutFg: $('#donutFg'),
+      autoPlay: $('#autoPlay')
     };
 
-    const TOTAL = 40;
-    const COUNTS = {2:15, 3:15, 5:10};
+    const TOTAL = 40, COUNTS = {2:15, 3:15, 5:10};
 
     const state = {
-      list: [], qi: 0, score: 0, answered:false,
+      list: [], qi: 0, score: 0, answered: false,
       correctByDigits: {2:0,3:0,5:0}
     };
 
@@ -156,8 +221,10 @@
     }
 
     function validateManifest(list){
-      const c2=list.filter(x=>x.digits===2).length; const c3=list.filter(x=>x.digits===3).length; const c5=list.filter(x=>x.digits===5).length;
-      if(c2!==COUNTS[2]||c3!==COUNTS[3]||c5!==COUNTS[5]){
+      const c2 = list.filter(x=>x.digits===2).length;
+      const c3 = list.filter(x=>x.digits===3).length;
+      const c5 = list.filter(x=>x.digits===5).length;
+      if(c2!==COUNTS[2] || c3!==COUNTS[3] || c5!==COUNTS[5]){
         alert(`Manifest counts invalid (2:${c2}, 3:${c3}, 5:${c5}). Rerun generator.`);
         throw new Error('Bad manifest');
       }
@@ -165,52 +232,64 @@
 
     function makeChoices(q){
       const d=q.digits; let min,max;
-      if(d===2){min=10;max=99;} else if(d===3){min=100;max=999;} else {min=10000;max=99999;}
-      const set=new Set([q.number]);
-      while(set.size<4) set.add(rnd(min,max));
+      if(d===2){min=10;max=99} else if(d===3){min=100;max=999} else {min=10000;max=99999}
+      const set=new Set([q.number]); while(set.size<4) set.add(rnd(min,max));
       return shuffle([...set]);
     }
 
-    function vibrate(ms){ if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(_){} }
-
-    function render(){
+    function renderQuestion(){
       const q = state.list[state.qi];
       UI.pillMode.textContent = `${q.digits}-digit`;
       UI.pillCount.textContent = `${state.qi+1} / ${TOTAL}`;
       UI.qIdx.textContent = String(state.qi+1);
       UI.bar.style.width = `${pct(state.qi, TOTAL)}%`;
       UI.feedback.innerHTML = '';
-      UI.next.disabled = true; UI.reveal.disabled = true; UI.replay.disabled = true;
+      UI.btnNext.disabled = true; UI.btnReveal.disabled = true; UI.btnReplay.disabled = true;
       state.answered = false;
 
-      // Set audio
+      // set audio for this question
       UI.player.src = q.file;
 
-      // Build choices
+      // build choices
       const nums = makeChoices(q);
       UI.choices.innerHTML = '';
       nums.forEach(n=>{
-        const b=document.createElement('button');
-        b.className='choice'; b.type='button'; b.textContent=n; b.setAttribute('aria-label',`choice ${n}`);
-        b.onclick=()=>choose(b, n, q.number, q.digits);
+        const b = document.createElement('button');
+        b.className = 'choice btn';
+        b.type = 'button';
+        b.textContent = n;
+        b.onclick = ()=>choose(b, n, q.number, q.digits);
         UI.choices.appendChild(b);
       });
+
+      // auto-play immediately after rendering (allowed because Start/Next are user gestures)
+      autoPlayCurrent();
+    }
+
+    function autoPlayCurrent(){
+      if(!UI.autoPlay.checked) return;
+      UI.player.currentTime = 0;
+      const p = UI.player.play();
+      if(p && p.catch) p.catch(()=>{ /* ignore policy errors */ });
+      UI.btnReplay.disabled = false;
     }
 
     function choose(btn, picked, correct, digits){
-      if(state.answered) return; state.answered=true;
-      $$('.choice', UI.choices).forEach(x=> x.disabled=true);
+      if(state.answered) return;
+      state.answered = true;
+      $$('.choice', UI.choices).forEach(x=>x.disabled=true);
 
       if(picked===correct){
         btn.classList.add('correct');
-        state.score++; state.correctByDigits[digits] = (state.correctByDigits[digits]||0)+1;
-        UI.feedback.innerHTML = `<div class="toastbox text-success">✅ Correct!</div>`;
+        state.score++;
+        state.correctByDigits[digits] = (state.correctByDigits[digits]||0)+1;
+        UI.feedback.innerHTML = '<div class="toastbox text-success">✅ Correct!</div>';
         vibrate(20);
-      } else {
+      }else{
         btn.classList.add('wrong');
-        UI.feedback.innerHTML = `<div class="toastbox text-danger">❌ Wrong. Correct: <strong>${correct}</strong></div>`;
-        const hit = $$('.choice', UI.choices).find(x=> Number(x.textContent)===correct);
+        const hit = $$('.choice', UI.choices).find(x=>Number(x.textContent)===correct);
         if(hit) hit.classList.add('correct');
+        UI.feedback.innerHTML = `<div class="toastbox text-danger">❌ Wrong. Correct: <strong>${correct}</strong></div>`;
         vibrate([20,40,20]);
       }
 
@@ -219,12 +298,18 @@
       const best = Number(localStorage.getItem('numtrainer_best')||'0');
       if(nowPct>best){ localStorage.setItem('numtrainer_best', String(nowPct)); UI.bestPct.textContent = String(nowPct); }
 
-      UI.next.disabled=false; UI.reveal.disabled=false; UI.replay.disabled=false;
+      UI.btnNext.disabled = false;
+      UI.btnReveal.disabled = false;
+      UI.btnReplay.disabled = false;
     }
 
-    function next(){
-      if(state.qi < TOTAL-1){ state.qi++; render(); }
-      else { finish(); }
+    function nextQuestion(){
+      if(state.qi < TOTAL-1){
+        state.qi++;
+        renderQuestion(); // auto-play happens inside
+      } else {
+        finish();
+      }
     }
 
     function reveal(){
@@ -232,43 +317,47 @@
       UI.feedback.innerHTML = `<div class="toastbox">🔎 Reveal: <strong>${q.number}</strong></div>`;
     }
 
-    function finish(){
-      setScreen('done');
-      UI.finalScore.textContent = state.score;
-      const p = pct(state.score, TOTAL); UI.finalPct.textContent = p;
-      const b2 = `2‑digit: <strong>${state.correctByDigits[2]||0}</strong> / ${COUNTS[2]}`;
-      const b3 = `3‑digit: <strong>${state.correctByDigits[3]||0}</strong> / ${COUNTS[3]}`;
-      const b5 = `5‑digit: <strong>${state.correctByDigits[5]||0}</strong> / ${COUNTS[5]}`;
-      UI.breakdown.innerHTML = `${b2} &nbsp;•&nbsp; ${b3} &nbsp;•&nbsp; ${b5}`;
-      UI.bar.style.width='100%';
-      setDonut(p);
-    }
-
     function setDonut(p){
-      const CIRC = 2*Math.PI*18; // r=18 → circumference≈113.1
+      const CIRC = 2*Math.PI*18; // r=18
       const filled = Math.max(0, Math.min(CIRC, CIRC*(p/100)));
       UI.donutFg.setAttribute('stroke-dasharray', `${filled} ${CIRC}`);
     }
 
-    function start(){
-      if(!Array.isArray(window.MANIFEST)){ alert('Missing audio/manifest.js. Run generate_audio.py'); return; }
-      validateManifest(MANIFEST);
-      state.list = shuffle([...MANIFEST]);
-      state.qi=0; state.score=0; state.answered=false; state.correctByDigits={2:0,3:0,5:0};
-      UI.liveScore.textContent='0'; UI.bestPct.textContent = localStorage.getItem('numtrainer_best')||'0';
-      UI.bar.style.width='0%';
-      setScreen('quiz');
-      render();
+    function finish(){
+      setScreen('done');
+      UI.finalScore.textContent = state.score;
+      const p = pct(state.score, TOTAL); UI.finalPct.textContent = p;
+      setDonut(p);
+      const b2 = `2-digit: <strong>${state.correctByDigits[2]||0}</strong> / ${COUNTS[2]}`;
+      const b3 = `3-digit: <strong>${state.correctByDigits[3]||0}</strong> / ${COUNTS[3]}`;
+      const b5 = `5-digit: <strong>${state.correctByDigits[5]||0}</strong> / ${COUNTS[5]}`;
+      UI.breakdown.innerHTML = `${b2} &nbsp;•&nbsp; ${b3} &nbsp;•&nbsp; ${b5}`;
+      UI.bar.style.width = '100%';
     }
 
-    // --- Wire events
-    $('#btnStart').addEventListener('click', start);
-    UI.play.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.replay.disabled=false; });
-    UI.replay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
-    UI.next.addEventListener('click', next);
-    UI.reveal.addEventListener('click', reveal);
-    UI.retry.addEventListener('click', ()=>{ setScreen('start'); });
+    function startQuiz(){
+      if(!Array.isArray(window.MANIFEST)){
+        alert('Missing audio/manifest.js (must set window.MANIFEST). Run generate_audio.py.');
+        return;
+      }
+      validateManifest(MANIFEST);
+      state.list = shuffle([...MANIFEST]);
+      state.qi = 0; state.score = 0; state.answered = false;
+      state.correctByDigits = {2:0,3:0,5:0};
+      UI.liveScore.textContent = '0';
+      UI.bestPct.textContent = localStorage.getItem('numtrainer_best')||'0';
+      UI.bar.style.width = '0%';
+      setScreen('quiz');
+      renderQuestion(); // auto-play inside
+    }
+
+    // ---- Events
+    UI.btnStart.addEventListener('click', startQuiz);
+    UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
+    UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
+    UI.btnNext.addEventListener('click', nextQuestion);
+    UI.btnReveal.addEventListener('click', reveal);
+    UI.btnRetry.addEventListener('click', ()=> setScreen('start'));
   </script>
 </body>
 </html>
-
