@@ -2,10 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Number Trainer — Phone (Offline, Auto-Play)</title>
+  <!-- FULL-PAGE MOBILE, NO ZOOM -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1,
+                 user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Number Trainer — Phone Fullscreen (Offline, Auto-Play)</title>
 
-  <!-- Bootstrap 5.0.2 (as requested) -->
+  <!-- Bootstrap 5.0.2 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
         rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
@@ -13,79 +18,121 @@
 
   <style>
     :root{
-      --bg:#0b0f16; --card:#101724; --ink:#e8ecf3; --muted:#97a4b7; --border:#1e2a3f;
+      /* Bigger base font for phone */
+      font-size: 19px;
+      --bg:#0b0f16; --card:#0f1523; --ink:#eef2f8; --muted:#a8b3c7; --border:#1e2a3f;
       --ok:#22c55e; --bad:#ef4444; --warn:#f59e0b; --g1:#5aa8ff; --g2:#7bffca;
     }
-    html,body{height:100%; background:var(--bg); color:var(--ink);}
-    body{margin:0;}
-    .app{min-height:100%; display:flex; align-items:center; justify-content:center; padding:10px;}
+    *{ -webkit-tap-highlight-color: transparent; }
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      /* prevent iOS text auto-zoom */
+      -webkit-text-size-adjust: 100%;
+      /* stop pull-to-refresh and overscroll bounce */
+      overscroll-behavior: none;
+      /* reduce accidental gestures */
+      touch-action: manipulation;
+      user-select: none;
+    }
+    /* FULL HEIGHT APP */
+    .app{
+      height:100svh; /* dynamic viewport for mobile */
+      width:100%;
+      display:flex;
+      flex-direction:column;
+    }
     .card-app{
-      width:100%; max-width:720px; border-radius:22px; overflow:hidden;
-      background: radial-gradient(1200px 800px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
-                  radial-gradient(1000px 700px at 110% -10%, rgba(123,255,202,.10), transparent 40%),
-                  var(--card);
-      border:1px solid var(--border);
-      box-shadow: 0 30px 80px rgba(0,0,0,.35);
+      flex:1 1 auto;
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      width:100%;
+      border-radius:0;                 /* edge-to-edge */
+      background:
+        radial-gradient(1200px 800px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
+        radial-gradient(1000px 700px at 110% -10%, rgba(123,255,202,.10), transparent 40%),
+        var(--card);
+      border:0;
     }
     .hero{
-      padding:14px 16px; border-bottom:1px solid var(--border);
-      backdrop-filter: blur(2px);
+      padding:12px 16px calc(8px + env(safe-area-inset-top));
+      border-bottom:1px solid var(--border);
     }
     .badge-pill{display:inline-flex; align-items:center; gap:.45rem;
-      padding:.25rem .6rem; border-radius:999px; font-size:.85rem;
-      background:#0f1626; border:1px solid #203049; color:#c7d2e4;}
-    .progress-wrap{height:12px; border-radius:999px; overflow:hidden;
-      background:#0e1523; border:1px solid var(--border);}
+      padding:.35rem .7rem; border-radius:999px; font-size:.95rem;
+      background:#0e1422; border:1px solid #203049; color:#d1d9e7;}
+    .progress-wrap{height:14px; border-radius:999px; overflow:hidden;
+      background:#0c1220; border:1px solid var(--border);}
     .progress-bar{height:100%; background:linear-gradient(90deg,var(--g1),var(--g2)); transition:width .25s ease;}
 
-    .screen{padding:16px;}
-    .intro h1{font-size:1.25rem; margin-bottom:.25rem;}
-    .intro p{color:var(--muted); margin-bottom:.5rem;}
-    .intro .btn-start{font-size:1.05rem; padding:.9rem 1rem; border-radius:14px;}
+    .screen{
+      flex:1 1 auto;
+      display:flex;
+      flex-direction:column;
+      padding:16px;
+      gap:12px;
+      overflow:hidden; /* contain to viewport */
+    }
+    .intro h1{font-size:1.5rem; margin:0 0 .25rem;}
+    .intro p{color:var(--muted); margin:0 0 .25rem;}
+    .intro ol{margin:.4rem 0 0 1.1rem}
+    .intro .btn-start{font-size:1.1rem; padding:1rem; border-radius:16px;}
 
-    .playbar{display:flex; align-items:center; gap:10px;}
+    .row-flex{display:flex; flex-direction:column; gap:12px; min-height:0;}
+    .playbar{display:flex; align-items:center; gap:12px; flex:none;}
     .btn-play{
-      width:62px; height:62px; border-radius:50%;
-      background:#0f1729; color:#d9e7ff; border:2px solid #22324f;
+      width:70px; height:70px; border-radius:50%;
+      background:#0f1729; color:#e8f1ff; border:2px solid #22324f;
       display:flex; align-items:center; justify-content:center;
-      font-size:1.1rem; position:relative;
+      font-size:1.2rem; position:relative; flex:none;
     }
     .btn-play.pulse::after{
-      content:""; position:absolute; inset:-6px; border-radius:50%;
+      content:""; position:absolute; inset:-8px; border-radius:50%;
       border:2px solid rgba(90,168,255,.35); animation:pulse 1.6s infinite;
     }
-    @keyframes pulse{0%{opacity:.9;transform:scale(.95)}70%{opacity:0;transform:scale(1.2)}100%{opacity:0;transform:scale(1.2)}}
+    @keyframes pulse{0%{opacity:.9;transform:scale(.95)}70%{opacity:0;transform:scale(1.18)}100%{opacity:0;transform:scale(1.18)}}
 
-    .switches{display:flex; gap:12px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:.92rem;}
-    .divider{height:1px; background:var(--border); margin:12px 0;}
+    .switches{display:flex; gap:14px; align-items:center; flex-wrap:wrap; color:var(--muted); font-size:1rem;}
+    .divider{height:1px; background:var(--border);}
 
-    .choices{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .choices{
+      display:grid; grid-template-columns:1fr 1fr; gap:12px;
+      min-height:0; overflow:auto; padding-bottom:8px;
+    }
     .choice{
-      padding:16px; border-radius:16px; border:2px solid #21304a; background:#0d1423;
-      font-size:1.8rem; font-weight:700; letter-spacing:.5px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      padding:18px; border-radius:18px; border:2px solid #21304a; background:#0d1423;
+      font-size:2.25rem; font-weight:800; letter-spacing:.5px; text-align:center;
+      box-shadow: 0 8px 26px rgba(0,0,0,.25);
       transition: transform .06s ease, border-color .2s ease, box-shadow .2s ease;
     }
     .choice:active{transform:scale(.985)}
     .choice.correct{border-color:var(--ok); box-shadow:0 0 0 3px rgba(34,197,94,.18) inset;}
     .choice.wrong{border-color:var(--bad); box-shadow:0 0 0 3px rgba(239,68,68,.18) inset;}
 
-    .toastbox{font-size:.98rem; padding:10px 12px; border-radius:12px;
+    .toastbox{font-size:1.05rem; padding:12px 14px; border-radius:14px;
       border:1px solid var(--border); background:#0e1626;}
     .muted{color:var(--muted);}
     .hidden{display:none !important;}
 
-    .sticky-cta{position:sticky; bottom:0; background:linear-gradient(180deg,transparent,rgba(11,15,22,.95));
-      padding-top:10px;}
-    .btn-wide{flex:1;}
+    .sticky-cta{
+      position:sticky; bottom:0;
+      background:linear-gradient(180deg,transparent,rgba(11,15,22,.96));
+      padding:10px 0 calc(8px + env(safe-area-inset-bottom));
+      z-index:10;
+      flex:none;
+    }
+    .btn-wide{flex:1; font-size:1.05rem; padding:.9rem 1rem; border-radius:14px;}
 
     /* Result donut */
-    .donut{width:140px; height:140px;}
+    .donut{width:160px; height:160px;}
     .donut .bg{stroke:#1f2a44;}
     .donut .fg{stroke-linecap:round;}
 
-    /* Thumb reach helpers on phones */
-    .pad-bottom{padding-bottom: 18px;}
+    /* Make all buttons large & easy to tap */
+    .btn{font-size:1.05rem; padding:.8rem 1rem; border-radius:14px;}
   </style>
 </head>
 <body>
@@ -99,7 +146,7 @@
             <span class="badge-pill" id="pillMode">Ready</span>
             <span class="badge-pill" id="pillCount">0 / 40</span>
           </div>
-          <div class="text-end small">
+          <div class="text-end small" style="font-size:1rem">
             <div class="muted">Best: <span id="bestPct">0</span>%</div>
             <div class="muted">Score: <span id="liveScore">0</span></div>
           </div>
@@ -109,33 +156,36 @@
 
       <!-- Start -->
       <div class="screen intro" id="screenStart">
-        <h1>Number Trainer</h1>
-        <p>Hear a number → tap the correct one. Exactly 40 questions (15×2-digit, 15×3-digit, 10×5-digit). Works offline.</p>
-        <ol class="muted small">
-          <li>Generate audio with <code>python generate_audio.py</code> (creates <code>audio/*.mp3</code> + <code>audio/manifest.js</code>).</li>
-          <li>Open this file on your phone (no server needed).</li>
-        </ol>
-        <button class="btn btn-primary btn-lg w-100 btn-start" id="btnStart">Start</button>
+        <div class="row-flex">
+          <div>
+            <h1>Number Trainer</h1>
+            <p>Hear a number → tap the correct one. 40 questions (15×2-digit, 15×3-digit, 10×5-digit). Works offline.</p>
+            <ol class="muted small">
+              <li>Run <code>python generate_audio.py</code> (creates <code>audio/*.mp3</code> + <code>audio/manifest.js</code>).</li>
+              <li>Open this file on your phone (no server needed).</li>
+            </ol>
+          </div>
+          <button class="btn btn-primary btn-start w-100" id="btnStart">Start</button>
+        </div>
       </div>
 
       <!-- Quiz -->
-      <div class="screen hidden pad-bottom" id="screenQuiz">
-        <div class="d-flex flex-column gap-2">
-
+      <div class="screen hidden" id="screenQuiz">
+        <div class="row-flex">
           <div class="playbar">
             <button class="btn-play pulse" id="btnPlay" aria-label="Play audio">▶️</button>
             <button class="btn btn-outline-light" id="btnReplay" disabled>⟲ Replay</button>
-            <span class="small muted">Q <span id="qIdx">1</span> / 40</span>
+            <span class="muted" style="margin-left:auto">Q <span id="qIdx">1</span> / 40</span>
           </div>
 
           <div class="switches">
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" id="autoPlay" checked>
-              <label class="form-check-label" for="autoPlay">Auto-play question</label>
+              <label class="form-check-label" for="autoPlay">Auto-play</label>
             </div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" id="haptics" checked>
-              <label class="form-check-label" for="haptics">Haptic feedback</label>
+              <label class="form-check-label" for="haptics">Haptics</label>
             </div>
           </div>
 
@@ -143,7 +193,7 @@
           <div class="divider"></div>
 
           <div class="choices" id="choices"></div>
-          <div class="mt-2" id="feedback"></div>
+          <div id="feedback"></div>
 
           <div class="sticky-cta">
             <div class="d-flex gap-2">
@@ -156,7 +206,7 @@
 
       <!-- Done -->
       <div class="screen hidden text-center" id="screenDone">
-        <h2 class="h4">Finished 🎉</h2>
+        <h2 class="h4" style="font-size:1.4rem">Finished 🎉</h2>
         <div class="d-flex justify-content-center my-2">
           <svg class="donut" viewBox="0 0 42 42" aria-label="Result">
             <defs>
@@ -169,17 +219,19 @@
             <circle class="fg" id="donutFg" cx="21" cy="21" r="18" fill="none" stroke="url(#grad)" stroke-width="4" stroke-dasharray="0 113"/>
           </svg>
         </div>
-        <p class="muted">Score: <strong><span id="finalScore">0</span>/40</strong> — <strong><span id="finalPct">0</span>%</strong></p>
-        <div class="small muted" id="breakdown"></div>
-        <div class="mt-3">
-          <button class="btn btn-success btn-lg w-100" id="btnRetry">Try Again</button>
+        <p class="muted" style="font-size:1.1rem">
+          Score: <strong><span id="finalScore">0</span>/40</strong> — <strong><span id="finalPct">0</span>%</strong>
+        </p>
+        <div class="small muted" id="breakdown" style="font-size:1.05rem"></div>
+        <div class="mt-2" style="padding-bottom:calc(env(safe-area-inset-bottom) + 6px)">
+          <button class="btn btn-success w-100" id="btnRetry">Try Again</button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- Offline manifest (generated by Python): must expose window.MANIFEST -->
+  <!-- Offline manifest (generated by Python): must set window.MANIFEST -->
   <script src="audio/manifest.js"></script>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
@@ -187,15 +239,26 @@
           crossorigin="anonymous"></script>
 
   <script>
-    // -------- Utils
+    // ======= HARD-BLOCK ZOOM (iOS/Android) =======
+    document.addEventListener('gesturestart', e => e.preventDefault());
+    document.addEventListener('gesturechange', e => e.preventDefault());
+    document.addEventListener('gestureend', e => e.preventDefault());
+    window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive:false });
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', e => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) { e.preventDefault(); }
+      lastTouchEnd = now;
+    }, { passive:false });
+
+    // ======= APP LOGIC =======
     const $ = (s, r=document)=>r.querySelector(s);
     const $$ = (s, r=document)=>[...r.querySelectorAll(s)];
     const shuffle = (a)=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
     const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
     const pct = (n,d)=>d?Math.round((n/d)*100):0;
-    const vibrate = (p)=>{ if($('#haptics').checked && navigator.vibrate){ try{ navigator.vibrate(p);}catch(_){} } };
+    const vibrate = (p)=>{ if($('#haptics')?.checked && navigator.vibrate){ try{ navigator.vibrate(p);}catch(_){} } };
 
-    // -------- UI refs
     const UI = {
       start: $('#screenStart'), quiz: $('#screenQuiz'), done: $('#screenDone'),
       btnStart: $('#btnStart'), btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'),
@@ -210,8 +273,7 @@
     const TOTAL = 40, COUNTS = {2:15, 3:15, 5:10};
 
     const state = {
-      list: [], qi: 0, score: 0, answered: false,
-      correctByDigits: {2:0,3:0,5:0}
+      list: [], qi: 0, score: 0, answered:false, correctByDigits:{2:0,3:0,5:0}
     };
 
     function setScreen(name){
@@ -241,28 +303,25 @@
       const q = state.list[state.qi];
       UI.pillMode.textContent = `${q.digits}-digit`;
       UI.pillCount.textContent = `${state.qi+1} / ${TOTAL}`;
-      UI.qIdx.textContent = String(state.qi+1);
+      UI.qIdx && (UI.qIdx.textContent = String(state.qi+1));
       UI.bar.style.width = `${pct(state.qi, TOTAL)}%`;
       UI.feedback.innerHTML = '';
       UI.btnNext.disabled = true; UI.btnReveal.disabled = true; UI.btnReplay.disabled = true;
       state.answered = false;
 
-      // set audio for this question
       UI.player.src = q.file;
 
-      // build choices
       const nums = makeChoices(q);
       UI.choices.innerHTML = '';
       nums.forEach(n=>{
-        const b = document.createElement('button');
-        b.className = 'choice btn';
-        b.type = 'button';
-        b.textContent = n;
-        b.onclick = ()=>choose(b, n, q.number, q.digits);
+        const b=document.createElement('button');
+        b.className='choice';
+        b.type='button';
+        b.textContent=n;
+        b.onclick=()=>choose(b, n, q.number, q.digits);
         UI.choices.appendChild(b);
       });
 
-      // auto-play immediately after rendering (allowed because Start/Next are user gestures)
       autoPlayCurrent();
     }
 
@@ -270,7 +329,7 @@
       if(!UI.autoPlay.checked) return;
       UI.player.currentTime = 0;
       const p = UI.player.play();
-      if(p && p.catch) p.catch(()=>{ /* ignore policy errors */ });
+      if(p && p.catch) p.catch(()=>{});
       UI.btnReplay.disabled = false;
     }
 
@@ -304,12 +363,8 @@
     }
 
     function nextQuestion(){
-      if(state.qi < TOTAL-1){
-        state.qi++;
-        renderQuestion(); // auto-play happens inside
-      } else {
-        finish();
-      }
+      if(state.qi < TOTAL-1){ state.qi++; renderQuestion(); }
+      else { finish(); }
     }
 
     function reveal(){
@@ -318,7 +373,7 @@
     }
 
     function setDonut(p){
-      const CIRC = 2*Math.PI*18; // r=18
+      const CIRC = 2*Math.PI*18;
       const filled = Math.max(0, Math.min(CIRC, CIRC*(p/100)));
       UI.donutFg.setAttribute('stroke-dasharray', `${filled} ${CIRC}`);
     }
@@ -348,10 +403,10 @@
       UI.bestPct.textContent = localStorage.getItem('numtrainer_best')||'0';
       UI.bar.style.width = '0%';
       setScreen('quiz');
-      renderQuestion(); // auto-play inside
+      renderQuestion();
     }
 
-    // ---- Events
+    // Events
     UI.btnStart.addEventListener('click', startQuiz);
     UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
     UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
