@@ -681,6 +681,78 @@
 <script src="audio/manifest.js"></script>
 
 <script>
+  /* --------- CONFIG: Google Form (with Level field) --------- */
+const FORM_URL   = "https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/formResponse";
+const FIELD_NAME = "entry.1894172247"; // name
+const FIELD_SCORE= "entry.18818728";   // score (number)
+const FIELD_IP   = "entry.361885690";  // IP
+const FIELD_LEVEL= "entry.64560435";   // Level_1 / Level_2 / Level_3 / Level_4 (or *_wip for checkpoint)
+/* --------- Level specs (example from old file) --------- */
+const LEVELS = {
+  L1: { label:"Level 1", key:"Level_1" },
+  L2: { label:"Level 2", key:"Level_2" },
+  L3: { label:"Level 3", key:"Level_3" },
+  L4: { label:"Level 4", key:"Level_4" }
+};
+function submitToForm({name, score, ip, level, checkpoint=false}){
+  try{
+    const params = new URLSearchParams();
+    params.set(FIELD_NAME,  name);
+    params.set(FIELD_SCORE, String(score));
+    params.set(FIELD_IP,    ip || "unknown");
+    params.set(FIELD_LEVEL, checkpoint ? levelTagWip(level) : levelTag(level));
+
+    const body = new Blob([params.toString()], {type:"application/x-www-form-urlencoded;charset=UTF-8"});
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(FORM_URL, body);
+    } else {
+      fetch(FORM_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+        body: params.toString()
+      }).catch(()=>{});
+    }
+  }catch(_){}
+}
+// profile – wherever you store user data (name, level, etc.)
+const profile = { name: "", ip: "" };
+
+// once on page load
+fetch("https://api.ipify.org?format=json", { cache:"no-store" })
+  .then(r => r.json())
+  .then(d => {
+    profile.ip = d.ip;
+    // saveAll(); // if you use localStorage as in old version
+  })
+  .catch(()=>{});
+// example: one level trainer
+const userName = document.querySelector('#nameInput').value.trim(); // or your field
+const finalScore = /* your score calculation here */;
+
+// L1 if you only use one level for this trainer
+submitToForm({
+  name: userName,
+  score: finalScore,
+  ip: profile?.ip || "",
+  level: "L1",          // or "L2"/"L3"… if you want
+  checkpoint: false     // true only if you send partial result
+});
+document.querySelector('#btnFinish').addEventListener('click', () => {
+  // ...calculate score, etc.
+  submitToForm({
+    name: userName,
+    score: finalScore,
+    ip: profile?.ip || "",
+    level: "L1",
+    checkpoint: false
+  });
+});
+
+/* --------- Scores & Submissions --------- */
+function levelTag(id){ return LEVELS[id].key; }             // "Level_1"... "Level_4"
+function levelTagWip(id){ return LEVELS[id].key + "_wip"; } // "..._wip"
+
 (function(){
   // --------- Levels config ---------
   const LEVELS = [
@@ -761,21 +833,31 @@
     return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
   }
 
-  function renderStars(container, count, big){
-    container.innerHTML = '';
-    const n = Math.max(0, Math.min(5, count || 0));
-    for(let i=1;i<=5;i++){
-      const span = document.createElement('span');
-      span.className = 'star ' + (i<=n ? 'full' : 'empty');
-      if(big) span.classList.add('big');
-      span.textContent = '★';
-      if(big){
-        span.style.animationDelay = (i*0.08) + 's';
-      }
-      container.appendChild(span);
+function renderStars(container, count, big){
+  container.innerHTML = '';
+  const n = Math.max(0, Math.min(5, count || 0));
+  for(let i=1;i<=5;i++){
+    const span = document.createElement('span');
+    span.className = 'star ' + (i<=n ? 'full' : 'empty');
+    if(big) span.classList.add('big');
+    span.textContent = '★';
+    if(big){
+      span.style.animationDelay = (i*0.08) + 's';
     }
+    container.appendChild(span);
   }
+}
 
+// 🔹 put it HERE, outside any function:
+const LEVEL_GOAL_TIME = {
+  L1: 70,   // 1:10
+  L2: 80,   // 1:20
+  L3: 130,  // 2:10
+  L4: 130,  // 2:10
+  L5: 150,  // 2:30
+  L6: 160,  // 2:40
+  L7: 300   // 5:00
+};
 
 // Time->stars: based only on how fast, using fixed goal times per level
 function computeStars(level, seconds, totalItems){
@@ -1185,15 +1267,6 @@ function computeStars(level, seconds, totalItems){
     const totalItems = st.total;
     const stars = computeStars(lvl, elapsedSec, totalItems);
     // Fixed goal time (in seconds) for each level
-const LEVEL_GOAL_TIME = {
-  L1: 70,   // 1:10
-  L2: 80,   // 1:20
-  L3: 130,  // 2:10
-  L4: 130,  // 2:10
-  L5: 150,  // 2:30
-  L6: 160,  // 2:40
-  L7: 300   // 5:00
-};
 
     // update store
     const prevBest = (store.bestTimes && store.bestTimes[lvl.id]) || null;
