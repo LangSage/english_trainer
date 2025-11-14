@@ -485,7 +485,15 @@
           Listen to the number and <strong>tap the correct digits</strong> or <strong>type what you hear</strong>.
           Try to get <span style="color:#facc15;">5★</span> on every level!
         </p>
-
+ <!-- 🔹 Name field -->
+  <div class="mb-2">
+    <label for="playerName" class="form-label mb-1" style="font-size:.75rem;color:var(--muted);">
+      Your name:
+    </label>
+    <input id="playerName" type="text"
+           class="form-control form-control-sm"
+           placeholder="Введи свое ФИО!!"/>
+  </div>
         <div class="levels-list" id="levelsList">
           <!-- Level cards are static HTML; JS fills stars & times -->
           <button class="level-card" data-level-id="L1">
@@ -681,118 +689,39 @@
 <script src="audio/manifest.js"></script>
 
 <script>
-  /* --------- CONFIG: Google Form (with Level field) --------- */
-const FORM_URL   = "https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/formResponse";
-const FIELD_NAME = "entry.1894172247"; // name
-const FIELD_SCORE= "entry.18818728";   // score (number)
-const FIELD_IP   = "entry.361885690";  // IP
-const FIELD_LEVEL= "entry.64560435";   // Level_1 / Level_2 / Level_3 / Level_4 (or *_wip for checkpoint)
-/* --------- Level specs (example from old file) --------- */
-const LEVELS = {
-  L1: { label:"Level 1", key:"Level_1" },
-  L2: { label:"Level 2", key:"Level_2" },
-  L3: { label:"Level 3", key:"Level_3" },
-  L4: { label:"Level 4", key:"Level_4" }
-};
-function submitToForm({name, score, ip, level, checkpoint=false}){
-  try{
-    const params = new URLSearchParams();
-    params.set(FIELD_NAME,  name);
-    params.set(FIELD_SCORE, String(score));
-    params.set(FIELD_IP,    ip || "unknown");
-    params.set(FIELD_LEVEL, checkpoint ? levelTagWip(level) : levelTag(level));
-
-    const body = new Blob([params.toString()], {type:"application/x-www-form-urlencoded;charset=UTF-8"});
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(FORM_URL, body);
-    } else {
-      fetch(FORM_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-        body: params.toString()
-      }).catch(()=>{});
-    }
-  }catch(_){}
-}
-// profile – wherever you store user data (name, level, etc.)
-const profile = { name: "", ip: "" };
-
-// once on page load
-fetch("https://api.ipify.org?format=json", { cache:"no-store" })
-  .then(r => r.json())
-  .then(d => {
-    profile.ip = d.ip;
-    // saveAll(); // if you use localStorage as in old version
-  })
-  .catch(()=>{});
-// example: one level trainer
-const userName = document.querySelector('#nameInput').value.trim(); // or your field
-const finalScore = /* your score calculation here */;
-
-// L1 if you only use one level for this trainer
-submitToForm({
-  name: userName,
-  score: finalScore,
-  ip: profile?.ip || "",
-  level: "L1",          // or "L2"/"L3"… if you want
-  checkpoint: false     // true only if you send partial result
-});
-document.querySelector('#btnFinish').addEventListener('click', () => {
-  // ...calculate score, etc.
-  submitToForm({
-    name: userName,
-    score: finalScore,
-    ip: profile?.ip || "",
-    level: "L1",
-    checkpoint: false
-  });
-});
-
-/* --------- Scores & Submissions --------- */
-function levelTag(id){ return LEVELS[id].key; }             // "Level_1"... "Level_4"
-function levelTagWip(id){ return LEVELS[id].key + "_wip"; } // "..._wip"
-
 (function(){
   // --------- Levels config ---------
   const LEVELS = [
-    // Level 1: choose numbers 1–2 digits, 16 items total
     { id:'L1', label:'Level 1',
       desc:'Choose 16 numbers (1–2 digits)',
       mode:'mcq',
       spec:[ {d:1,c:8}, {d:2,c:8} ]
     },
-    // Level 2: choose 2-digit numbers, 25 items
     { id:'L2', label:'Level 2',
       desc:'Choose 25 numbers (2 digits)',
       mode:'mcq',
       spec:[ {d:2,c:25} ]
     },
-    // Level 3: choose 3-digit numbers, 20 items
     { id:'L3', label:'Level 3',
       desc:'Choose 20 numbers (3 digits)',
       mode:'mcq',
       spec:[ {d:3,c:20} ]
     },
-    // Level 4: choose 4- & 5-digit numbers, 10 + 10
     { id:'L4', label:'Level 4',
       desc:'Choose 10 × 4-digit + 10 × 5-digit',
       mode:'mcq',
       spec:[ {d:4,c:10}, {d:5,c:10} ]
     },
-    // Level 5: write 2-digit numbers, 25 items
     { id:'L5', label:'Level 5',
       desc:'Write 25 numbers (2 digits)',
       mode:'type',
       spec:[ {d:2,c:25} ]
     },
-    // Level 6: write 3-digit numbers, 20 items
     { id:'L6', label:'Level 6',
       desc:'Write 20 numbers (3 digits)',
       mode:'type',
       spec:[ {d:3,c:20} ]
     },
-    // Level 7: write what you hear, 4- & 5-digit numbers, 10 + 10
     { id:'L7', label:'Level 7',
       desc:'Write 10 × 4-digit + 10 × 5-digit',
       mode:'type',
@@ -814,6 +743,7 @@ function levelTagWip(id){ return LEVELS[id].key + "_wip"; } // "..._wip"
     }
     return a;
   }
+
   function rnd(min,max){
     return Math.floor(Math.random()*(max-min+1))+min;
   }
@@ -833,50 +763,45 @@ function levelTagWip(id){ return LEVELS[id].key + "_wip"; } // "..._wip"
     return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
   }
 
-function renderStars(container, count, big){
-  container.innerHTML = '';
-  const n = Math.max(0, Math.min(5, count || 0));
-  for(let i=1;i<=5;i++){
-    const span = document.createElement('span');
-    span.className = 'star ' + (i<=n ? 'full' : 'empty');
-    if(big) span.classList.add('big');
-    span.textContent = '★';
-    if(big){
-      span.style.animationDelay = (i*0.08) + 's';
+  function renderStars(container, count, big){
+    container.innerHTML = '';
+    const n = Math.max(0, Math.min(5, count || 0));
+    for(let i=1;i<=5;i++){
+      const span = document.createElement('span');
+      span.className = 'star ' + (i<=n ? 'full' : 'empty');
+      if(big) span.classList.add('big');
+      span.textContent = '★';
+      if(big){
+        span.style.animationDelay = (i*0.08) + 's';
+      }
+      container.appendChild(span);
     }
-    container.appendChild(span);
   }
-}
 
-// 🔹 put it HERE, outside any function:
-const LEVEL_GOAL_TIME = {
-  L1: 70,   // 1:10
-  L2: 80,   // 1:20
-  L3: 130,  // 2:10
-  L4: 130,  // 2:10
-  L5: 150,  // 2:30
-  L6: 160,  // 2:40
-  L7: 300   // 5:00
-};
+  // 🔹 Your fixed goal times (seconds)
+  const LEVEL_GOAL_TIME = {
+    L1: 70,   // 1:10
+    L2: 80,   // 1:20
+    L3: 130,  // 2:10
+    L4: 130,  // 2:10
+    L5: 150,  // 2:30
+    L6: 160,  // 2:40
+    L7: 300   // 5:00
+  };
 
-// Time->stars: based only on how fast, using fixed goal times per level
-function computeStars(level, seconds, totalItems){
-  if(!Number.isFinite(seconds) || seconds <= 0) return 1;
+  // Time->stars using your fixed per-level times
+  function computeStars(level, seconds, totalItems){
+    if(!Number.isFinite(seconds) || seconds <= 0) return 1;
 
-  // Use your custom goal time for this level
-  const goal = LEVEL_GOAL_TIME[level.id] || 120; // fallback 2 min if missing
+    const goal = LEVEL_GOAL_TIME[level.id] || (totalItems ? totalItems*5 : 120);
+    const ratio = seconds / goal;
 
-  const ratio = seconds / goal;
-
-  // same thresholds as before
-  if (ratio <= 0.6) return 5;   // super fast
-  if (ratio <= 0.8) return 4;
-  if (ratio <= 1.1) return 3;
-  if (ratio <= 1.4) return 2;
-  return 1;
-}
-
-
+    if (ratio <= 0.6) return 5;
+    if (ratio <= 0.8) return 4;
+    if (ratio <= 1.1) return 3;
+    if (ratio <= 1.4) return 2;
+    return 1;
+  }
 
   // --------- Local storage ---------
   const STORE_KEY = 'number_trainer_v2';
@@ -957,6 +882,9 @@ function computeStars(level, seconds, totalItems){
   const megaWin = $('#megaWin');
   const btnMegaClose = $('#btnMegaClose');
 
+  // 🔹 Name input
+  const playerNameInput = $('#playerName');
+
   // --------- Confetti for mega win ---------
   function buildConfetti(){
     if(!megaWin) return;
@@ -1023,7 +951,6 @@ function computeStars(level, seconds, totalItems){
           queue.push(...pool);
         }
         missing.push({digits:d, need:count, have:pool.length});
-        // fill with random numbers (no audio yet) so level still works
         const [min,max] = digitsRange(d);
         const set = new Set(pool);
         while(set.size < count){
@@ -1086,7 +1013,6 @@ function computeStars(level, seconds, totalItems){
     const n = current.currentNumber;
     const item = findManifestItem(n);
     if(!item || !item.file){
-      // no audio yet
       return;
     }
     try{
@@ -1126,7 +1052,6 @@ function computeStars(level, seconds, totalItems){
     quizDigitsInfo.textContent = txtDigits;
     feedbackArea.textContent = '';
 
-    // mode
     const typedMode = (st.level.mode === 'type');
     mcqWrap.classList.toggle('hidden', typedMode);
     typedWrap.classList.toggle('hidden', !typedMode);
@@ -1138,7 +1063,6 @@ function computeStars(level, seconds, totalItems){
       setTimeout(()=>typedAnswer.focus(), 80);
     }
 
-    // build MCQ choices
     if(!typedMode){
       choicesBox.innerHTML = '';
       const opts = buildOptions(n);
@@ -1153,7 +1077,6 @@ function computeStars(level, seconds, totalItems){
       });
     }
 
-    // auto play audio if available
     playCurrentAudio();
     updateQuizHeader();
   }
@@ -1196,7 +1119,7 @@ function computeStars(level, seconds, totalItems){
         st.completed.add(correct);
       }
       feedbackArea.innerHTML = '<span style="color:var(--accent);">✅ Correct!</span>';
-      st.queue.shift(); // remove
+      st.queue.shift();
     }else{
       btn.classList.add('wrong');
       feedbackArea.innerHTML = '<span style="color:var(--danger);">❌ Wrong, this number will come back later.</span>';
@@ -1213,7 +1136,6 @@ function computeStars(level, seconds, totalItems){
     if(!current) return;
     const st = current;
 
-    // if already checked and user presses again -> act like "Next"
     if(st.questionAnswered){
       btnNext.click();
       return;
@@ -1221,8 +1143,8 @@ function computeStars(level, seconds, totalItems){
 
     const raw = typedAnswer.value.trim();
     const n = st.queue[0];
-
     const val = Number(raw);
+
     if(!raw || !Number.isFinite(val)){
       typedAnswer.classList.add('is-invalid');
       feedbackArea.innerHTML = '<span style="color:var(--warning);">⚠️ Type digits only.</span>';
@@ -1266,9 +1188,7 @@ function computeStars(level, seconds, totalItems){
     const lvl = st.level;
     const totalItems = st.total;
     const stars = computeStars(lvl, elapsedSec, totalItems);
-    // Fixed goal time (in seconds) for each level
 
-    // update store
     const prevBest = (store.bestTimes && store.bestTimes[lvl.id]) || null;
     if(prevBest === null || elapsedSec < prevBest){
       store.bestTimes[lvl.id] = elapsedSec;
@@ -1281,7 +1201,6 @@ function computeStars(level, seconds, totalItems){
     store.totalRuns[lvl.id]++;
     saveStore();
 
-    // update UI
     updateGlobalProgress();
 
     resultLevelTitle.textContent = lvl.label + ' complete!';
@@ -1293,8 +1212,6 @@ function computeStars(level, seconds, totalItems){
     resultAttempts.textContent = st.attempts;
 
     showScreen('result');
-
-    // check mega win
     checkMegaWin();
   }
 
@@ -1307,7 +1224,6 @@ function computeStars(level, seconds, totalItems){
     }
   }
 
-  // --------- Starting a level ---------
   function startLevel(id){
     const level = LEVEL_MAP[id];
     if(!level) return;
@@ -1335,7 +1251,6 @@ function computeStars(level, seconds, totalItems){
     timerId = setInterval(updateTimer, 250);
     quizTimer.textContent = '00:00';
 
-    // small warning if audio missing for some digit groups
     if(missing && missing.length && audioWarningEl){
       audioWarningEl.textContent = '⚠️ Audio missing for some numbers, but level will still work.';
       audioWarningEl.classList.remove('hidden');
@@ -1348,7 +1263,6 @@ function computeStars(level, seconds, totalItems){
   }
 
   // --------- Event listeners ---------
-  // Level cards
   $$('#levelsList .level-card').forEach(btn=>{
     const id = btn.getAttribute('data-level-id');
     btn.addEventListener('click', ()=> startLevel(id));
@@ -1374,6 +1288,7 @@ function computeStars(level, seconds, totalItems){
   });
 
   btnCheck.addEventListener('click', handleCheckTyped);
+
   btnClear.addEventListener('click', ()=>{
     typedAnswer.value = '';
     typedAnswer.classList.remove('is-invalid','is-valid');
@@ -1393,12 +1308,8 @@ function computeStars(level, seconds, totalItems){
   });
 
   btnResultRetry.addEventListener('click', ()=>{
-    if(!current){
-      // retry last level from store? just go back to menu
-      showScreen('menu');
-      headerLevelText.textContent = 'Menu';
-      return;
-    }
+    showScreen('menu');
+    headerLevelText.textContent = 'Menu';
   });
 
   btnMegaClose.addEventListener('click', ()=>{
@@ -1406,6 +1317,15 @@ function computeStars(level, seconds, totalItems){
   });
 
   // --------- Init ---------
+  // load saved name
+  const savedName = localStorage.getItem('trainer_player_name') || '';
+  if(playerNameInput){
+    playerNameInput.value = savedName;
+    playerNameInput.addEventListener('input', ()=>{
+      localStorage.setItem('trainer_player_name', playerNameInput.value.trim());
+    });
+  }
+
   updateGlobalProgress();
   showScreen('menu');
 })();
