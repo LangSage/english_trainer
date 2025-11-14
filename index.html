@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <!-- PHONE: fill screen, no zoom -->
   <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1,
                  user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Number Trainer — 4 Levels (Static, Cached, Auto Submit)</title>
+  <title>Number Trainer — 7 Levels</title>
 
   <!-- Bootstrap 5.0.2 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
@@ -18,667 +15,1318 @@
 
   <style>
     :root{
-      font-size:18px; /* tuned for phones */
-      --bg:#0b0f16; --card:#0f1523; --ink:#eef2f8; --muted:#a8b3c7; --border:#1e2a3f;
-      --ok:#22c55e; --bad:#ef4444; --g1:#5aa8ff; --g2:#7bffca; --num:#ffd400;
+      --bg: #050815;
+      --card: #0c1224;
+      --accent: #22c55e;
+      --accent-soft: rgba(34,197,94,.25);
+      --accent2: #3b82f6;
+      --border: #1c2742;
+      --text: #e5ecff;
+      --muted: #8c95b0;
+      --danger: #f97373;
+      --warning: #eab308;
     }
-    *{ -webkit-tap-highlight-color: transparent; }
+
+    *{ box-sizing:border-box; }
+
     html,body{
-      height:100%; margin:0; background:var(--bg); color:var(--ink);
-      -webkit-text-size-adjust:100%; overscroll-behavior:none; touch-action:manipulation; user-select:none;
+      margin:0; padding:0;
+      height:100%; width:100%;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background: radial-gradient(1200px 800px at -10% -20%, #1e293b, transparent 50%),
+                  radial-gradient(1200px 800px at 110% -20%, #0f766e, transparent 50%),
+                  var(--bg);
+      color:var(--text);
+      -webkit-text-size-adjust:100%;
+      overscroll-behavior:none;
+      touch-action:manipulation;
     }
-    .app{height:100svh; width:100%; display:flex; flex-direction:column;}
-    .card-app{
-      flex:1; display:flex; flex-direction:column; border-radius:0;
+
+    body{
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+    }
+
+    .app{
+      width:100%;
+      max-width:600px;
+      min-height:100vh;
+      padding:8px 10px 16px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .app-card{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      border-radius:18px;
       background:
-        radial-gradient(900px 600px at -10% -20%, rgba(90,168,255,.12), transparent 40%),
-        radial-gradient(900px 600px at 110% -10%, rgba(123,255,202,.10), transparent 40%),
+        radial-gradient(900px 600px at -10% -20%, rgba(96,165,250,.18), transparent 40%),
+        radial-gradient(900px 600px at 110% -10%, rgba(45,212,191,.16), transparent 40%),
         var(--card);
+      box-shadow:0 16px 60px rgba(0,0,0,.65);
+      padding:10px 12px 14px;
     }
 
-    /* Header + Tabs */
-    .hero{padding:10px 12px calc(8px + env(safe-area-inset-top)); border-bottom:1px solid var(--border);}
-    .badge-pill{display:inline-flex; align-items:center; gap:.45rem; padding:.3rem .65rem; border-radius:999px; font-size:.9rem; background:#0e1422; border:1px solid #203049; color:#d1d9e7;}
-    .progress-wrap{height:12px; border-radius:999px; overflow:hidden; background:#0c1220; border:1px solid var(--border);}
-    .progress-bar{height:100%; background:linear-gradient(90deg,var(--g1),var(--g2)); transition:width .25s ease;}
-    .tabs{display:flex; gap:6px; margin-top:8px;}
-    .tab{flex:1; text-align:center; padding:.6rem .5rem; border-radius:12px; border:1px solid var(--border); background:#0e1626; color:#cfe1ff; font-weight:600;}
-    .tab.active{background:#142038; border-color:#2a4170;}
+    .hidden{ display:none !important; }
 
-    .screen{flex:1; display:flex; flex-direction:column; padding:12px; gap:10px; min-height:0;}
-    .hidden{display:none !important;}
-    .muted{color:var(--muted);}
-
-    .intro h1{font-size:1.2rem;margin:0}
-    .name-row{display:flex; gap:8px; align-items:center;}
-    .name-input{flex:1; background:#0e1626; border:1px solid var(--border); color:#fff; border-radius:12px; padding:.85rem 1rem; font-size:1.05rem;}
-    .btn{border-radius:14px;}
-    .btn-start{padding:.9rem 1rem;}
-
-    .quiz-grid{flex:1; display:grid; grid-template-rows:auto 1fr auto; gap:10px; min-height:0;}
-    .playbar{display:flex; align-items:center; gap:8px;}
-    .btn-play{width:68px;height:68px;border-radius:50%;background:#0f1729;color:#e8f1ff;border:2px solid #22324f;display:flex;align-items:center;justify-content:center;font-size:1.15rem;}
-    .btn-fat{padding:.8rem 1rem;}
-
-    .choices{
-      min-height:0; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:10px;
+    .app-header{
+      padding:4px 2px 8px;
+      border-bottom:1px solid var(--border);
+      margin-bottom:8px;
     }
-    .choice{
-      display:flex; align-items:center; justify-content:center;
-      border:2px solid #21304a; background:#0d1423; border-radius:16px;
-      box-shadow:0 8px 24px rgba(0,0,0,.25);
-      color:var(--num); text-shadow:0 1px 2px rgba(0,0,0,.85);
-      font-weight:900; letter-spacing:.4px; text-align:center;
-      font-size:clamp(1.9rem, 9vw, 2.8rem);
-      padding:8px; transition:transform .06s ease, border-color .2s ease, box-shadow .2s ease;
+
+    .app-title{
+      font-size:1.3rem;
+      font-weight:700;
+      letter-spacing:.03em;
     }
-    .choice:active{transform:scale(.985)}
-    .choice.correct{border-color:var(--ok); box-shadow:0 0 0 3px rgba(34,197,94,.18) inset;}
-    .choice.wrong{border-color:var(--bad); box-shadow:0 0 0 3px rgba(239,68,68,.18) inset;}
 
-    /* Type mode (Level 4) */
-    .answerWrap{display:flex; flex-direction:column; gap:10px;}
-    .answerInput{
-      width:100%; background:#0e1626; color:#fff; border:2px solid #21304a; border-radius:16px;
-      padding:1rem 1.1rem; font-weight:800; letter-spacing:.4px; text-align:center;
-      font-size:clamp(2rem,10vw,2.6rem);
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      padding:2px 9px;
+      border-radius:999px;
+      background:#050816;
+      border:1px solid #1e293b;
+      font-size:.75rem;
+      color:var(--muted);
+      white-space:nowrap;
     }
-    .answerInput:focus{outline:none; border-color:#2a4170; box-shadow:0 0 0 3px rgba(90,168,255,.18);}
-    .btn-check{padding:1rem; font-size:1.1rem;}
 
-    .cta{position:sticky; bottom:0; padding-top:6px; background:linear-gradient(180deg,transparent,rgba(11,15,22,.95)); padding-bottom:calc(6px + env(safe-area-inset-bottom));}
-    .btn-next{width:100%; padding:1rem 1rem; font-size:1.1rem;}
+    .pill .dot{
+      width:6px; height:6px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 4px rgba(34,197,94,.25);
+    }
 
-    .toastbox{font-size:.98rem; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:#0e1626;}
-    .warn{color:#ffd466}
+    .global-progress-wrap{
+      margin-top:6px;
+    }
 
-    .row-compact{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-    .btn-mini{padding:.4rem .6rem; font-size:.85rem; border-radius:10px;}
+    .progress{
+      background:#050816;
+      border-radius:999px;
+      border:1px solid #1e2238;
+      height:12px;
+      overflow:hidden;
+    }
+    .progress-bar{
+      background:linear-gradient(90deg,var(--accent),#4ade80);
+    }
+
+    .screen{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      padding:6px 2px 4px;
+    }
+
+    /* LEVEL LIST */
+    .levels-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .level-card{
+      border-radius:14px;
+      border:1px solid #141a30;
+      background:linear-gradient(135deg,rgba(15,23,42,.95),rgba(15,23,42,.96));
+      color:inherit;
+      padding:10px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      text-align:left;
+      width:100%;
+      box-shadow:0 10px 25px rgba(0,0,0,.45);
+      transition:transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .level-card:active{
+      transform:scale(.98) translateY(1px);
+      box-shadow:0 8px 16px rgba(0,0,0,.6);
+    }
+    .level-card:hover{
+      border-color:#1d2a4b;
+    }
+
+    .level-name{
+      font-size:.98rem;
+      font-weight:700;
+    }
+    .level-desc{
+      font-size:.78rem;
+      color:var(--muted);
+    }
+    .level-chip{
+      font-size:.7rem;
+      color:var(--muted);
+    }
+
+    .stars{
+      display:flex;
+      gap:2px;
+      justify-content:flex-end;
+    }
+    .star{
+      font-size:.85rem;
+      filter:drop-shadow(0 0 4px rgba(0,0,0,.6));
+      transform-origin:center;
+    }
+    .star.full{
+      color:#facc15;
+    }
+    .star.empty{
+      color:#1e293b;
+    }
+    .stars-big .star{
+      font-size:1.6rem;
+    }
+
+    .time-label{
+      font-size:.75rem;
+      color:var(--muted);
+      text-align:right;
+    }
+
+    /* QUIZ */
+    .quiz-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    .btn-back{
+      font-size:.85rem;
+      color:var(--muted);
+      padding:4px 0;
+    }
+
+    .timer-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      padding:2px 10px;
+      border-radius:999px;
+      background:#020617;
+      border:1px solid #1f2937;
+      font-size:.8rem;
+      color:var(--muted);
+      margin-bottom:8px;
+      max-width:max-content;
+    }
+
+    .question-card{
+      border-radius:16px;
+      border:1px solid #141a30;
+      background:radial-gradient(800px 400px at 0% -40%, rgba(59,130,246,.25), transparent),
+                 radial-gradient(800px 400px at 120% -10%, rgba(34,197,94,.23), transparent),
+                 #020617;
+      padding:12px 12px 12px;
+      margin-bottom:10px;
+      text-align:center;
+    }
+    .question-label{
+      font-size:.8rem;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .question-main{
+      font-size:1.8rem;
+      font-weight:800;
+      margin-top:4px;
+      text-shadow:0 4px 18px rgba(0,0,0,.75);
+    }
+    .question-sub{
+      font-size:.78rem;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .btn-sound{
+      margin-top:8px;
+      font-size:.85rem;
+      padding:4px 12px;
+      border-radius:999px;
+      border:1px solid #1f2937;
+      background:#020617;
+      color:var(--text);
+    }
+    .btn-sound:active{
+      transform:scale(.97);
+    }
+
+    .choices-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .choice-btn{
+      border-radius:14px;
+      border:1px solid #1f2937;
+      background:#020617;
+      padding:10px 6px;
+      font-size:1.35rem;
+      font-weight:700;
+      color:var(--text);
+      box-shadow:0 8px 20px rgba(0,0,0,.6);
+      transition:transform .06s ease, box-shadow .08s ease, border-color .08s ease, background .08s ease;
+    }
+    .choice-btn:active{
+      transform:scale(.97) translateY(1px);
+      box-shadow:0 5px 14px rgba(0,0,0,.7);
+    }
+    .choice-btn.correct{
+      border-color:var(--accent);
+      background:rgba(34,197,94,.08);
+    }
+    .choice-btn.wrong{
+      border-color:var(--danger);
+      background:rgba(220,38,38,.07);
+    }
+
+    #typedWrap input{
+      text-align:center;
+      font-size:1.3rem;
+      letter-spacing:.06em;
+    }
+
+    #feedbackArea{
+      min-height:22px;
+    }
+
+    .badge-small{
+      display:inline-flex;
+      align-items:center;
+      gap:.25rem;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:.7rem;
+      background:#020617;
+      border:1px solid #111827;
+      color:var(--muted);
+    }
+
+    /* RESULT */
+    .result-wrap{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:16px 12px 8px;
+    }
+
+    .result-title{
+      font-size:1.3rem;
+      font-weight:700;
+      margin-bottom:4px;
+    }
+
+    .result-sub{
+      font-size:.9rem;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .result-time{
+      font-size:1rem;
+      margin-bottom:2px;
+    }
+    .result-extra{
+      font-size:.8rem;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent2),#22c55e);
+      border:none;
+    }
+    .btn-primary:active{
+      transform:scale(.98) translateY(1px);
+    }
+
+    /* MEGA ANIMATION */
+    .mega{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(circle at top,#1d283a,#020617 60%);
+      z-index:9999;
+    }
+    .mega.hidden{ display:none !important; }
+
+    .mega-inner{
+      position:relative;
+      padding:22px 18px 16px;
+      border-radius:26px;
+      background:
+        radial-gradient(700px 400px at 10% -40%, rgba(59,130,246,.35), transparent 60%),
+        radial-gradient(800px 450px at 120% 0%, rgba(34,197,94,.35), transparent 60%),
+        #020617;
+      border:1px solid #1f2937;
+      text-align:center;
+      box-shadow:0 0 40px rgba(34,197,94,.45);
+      animation:megaPop .7s cubic-bezier(.22,1.15,.4,1);
+      overflow:hidden;
+    }
+
+    .mega-title{
+      font-size:1.5rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      margin-bottom:4px;
+      text-shadow:0 0 20px rgba(34,197,94,.8);
+    }
+    .mega-sub{
+      font-size:.9rem;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .mega-stars{
+      display:flex;
+      justify-content:center;
+      gap:4px;
+      margin-bottom:10px;
+    }
+    .mega-stars .star{
+      font-size:1.5rem;
+      color:#facc15;
+      animation:starPulse 1.2s ease-in-out infinite alternate;
+    }
+
+    .confetti{
+      position:absolute;
+      width:7px;
+      height:14px;
+      border-radius:3px;
+      background:#facc15;
+      opacity:.9;
+      animation:confettiFall linear infinite;
+      pointer-events:none;
+    }
+
+    @keyframes megaPop{
+      0%{ transform:scale(.7) translateY(40px); opacity:0;}
+      60%{ transform:scale(1.04) translateY(0); opacity:1;}
+      100%{ transform:scale(1) translateY(0); opacity:1;}
+    }
+
+    @keyframes starPulse{
+      from{ transform:scale(1) translateY(0); filter:drop-shadow(0 0 8px rgba(250,204,21,.6)); }
+      to{ transform:scale(1.1) translateY(-3px); filter:drop-shadow(0 0 14px rgba(250,204,21,1)); }
+    }
+
+    @keyframes confettiFall{
+      0%{ transform:translate3d(0,-120vh,0) rotateZ(0deg);}
+      100%{ transform:translate3d(0,120vh,0) rotateZ(360deg);}
+    }
+
+    /* small screens */
+    @media (max-width: 480px){
+      .question-main{ font-size:1.6rem; }
+      .choice-btn{ font-size:1.25rem; padding:9px 4px;}
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="card-app">
+<div class="app">
+  <div class="app-card">
 
-      <!-- HEADER -->
-      <div class="hero">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <div class="row-compact">
-            <span class="badge-pill" id="pillLevel">Level 1</span>
-            <span class="badge-pill" id="pillCount">Done 0 / 40</span>
-            <span class="badge-pill" id="pillWarn" style="display:none">⚠️ Missing audio</span>
-          </div>
-          <div class="text-end" style="font-size:.95rem">
-            <div class="muted">Unique Correct: <span id="liveScore">0</span></div>
-          </div>
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="app-title">Number Trainer</div>
+          <div class="text-muted" style="font-size:.7rem;">7 levels · listen & choose / type numbers</div>
         </div>
-        <div class="mt-2 progress-wrap"><div id="bar" class="progress-bar" style="width:0%"></div></div>
-        <div class="tabs">
-          <button class="tab active" id="tabL1">Level 1</button>
-          <button class="tab" id="tabL2">Level 2</button>
-          <button class="tab" id="tabL3">Level 3</button>
-          <button class="tab" id="tabL4">Level 4</button>
+        <div>
+          <span class="pill">
+            <span class="dot"></span>
+            <span id="headerLevelText">Menu</span>
+          </span>
         </div>
       </div>
 
-      <!-- BODY -->
-      <div class="screen" id="screen">
-        <!-- Start / Resume -->
-        <div id="paneStart">
-          <div class="intro">
-            <h1 id="title">Number Trainer — <span id="titleLevel">Level 1</span></h1>
-            <p class="muted mb-2" id="levelDesc"></p>
-            <div class="name-row mb-2">
-              <input id="nameInput" class="name-input" type="text" autocomplete="name" placeholder="Your full name" required>
-              <button class="btn btn-primary btn-start" id="btnStart" disabled>Start</button>
-            </div>
-            <div class="row-compact">
-              <button class="btn btn-outline-light btn-mini" id="btnResume" style="display:none">Resume</button>
-              <button class="btn btn-outline-warning btn-mini" id="btnReset" style="display:none">Reset Level</button>
-            </div>
-            <div class="muted small mt-2" id="availInfo"></div>
-          </div>
+      <div class="global-progress-wrap mt-2">
+        <div class="d-flex justify-content-between align-items-center mb-1" style="font-size:.75rem;">
+          <span class="text-muted">Overall progress</span>
+          <span id="globalProgressLabel" class="text-muted">0%</span>
         </div>
-
-        <!-- Quiz -->
-        <div id="paneQuiz" class="hidden">
-          <div class="quiz-grid">
-            <div class="playbar">
-              <button class="btn-play" id="btnPlay" aria-label="Play audio">▶️</button>
-              <button class="btn btn-outline-light btn-fat" id="btnReplay" disabled>⟲ Replay</button>
-              <span class="muted ms-auto">Queue: <span id="queueLeft">0</span></span>
-            </div>
-
-            <!-- Multiple choice (Levels 1–3) -->
-            <div class="choices" id="choices"></div>
-
-            <!-- Type answer (Level 4) -->
-            <div class="answerWrap hidden" id="answerWrap">
-              <input id="answerInput" class="answerInput" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="Type the number" />
-              <button class="btn btn-primary btn-check" id="btnCheck">Check</button>
-            </div>
-
-            <div class="cta">
-              <div id="feedback" class="mb-2"></div>
-              <button class="btn btn-primary btn-next" id="btnNext" disabled>Next ➜</button>
-            </div>
-          </div>
-          <audio id="player" preload="auto" playsinline></audio>
-        </div>
-
-        <!-- Done -->
-        <div id="paneDone" class="hidden text-center">
-          <h2 class="h5">Finished 🎉</h2>
-          <p class="muted">Attempts: <strong><span id="attemptsTotal">0</span></strong> — Score: <strong><span id="scorePct">0</span>%</strong></p>
-          <div class="small muted" id="breakdown"></div>
-          <div class="mt-2">
-            <button class="btn btn-success w-100" id="btnAgain">Do Again</button>
-          </div>
+        <div class="progress">
+          <div id="globalProgressBar" class="progress-bar" style="width:0%;"></div>
         </div>
       </div>
+    </header>
 
-    </div>
+    <!-- MAIN SCREENS -->
+    <main class="screen">
+
+      <!-- MENU -->
+      <section id="screen-menu">
+        <p class="mb-2" style="font-size:.8rem;color:var(--muted);">
+          Listen to the number and <strong>tap the correct digits</strong> or <strong>type what you hear</strong>.
+          Try to get <span style="color:#facc15;">5★</span> on every level!
+        </p>
+
+        <div class="levels-list" id="levelsList">
+          <!-- Level cards are static HTML; JS fills stars & times -->
+          <button class="level-card" data-level-id="L1">
+            <div>
+              <div class="level-name">Level 1</div>
+              <div class="level-desc">Choose numbers: 1–2 digits · 16 items</div>
+              <div class="level-chip">Mode: multiple choice</div>
+            </div>
+            <div class="text-end">
+              <div class="stars" data-stars-for="L1"></div>
+              <div class="time-label">Best: <span data-time-for="L1">—</span></div>
+            </div>
+          </button>
+
+          <button class="level-card" data-level-id="L2">
+            <div>
+              <div class="level-name">Level 2</div>
+              <div class="level-desc">Choose numbers: 2 digits · 25 items</div>
+              <div class="level-chip">Mode: multiple choice</div>
+            </div>
+            <div class="text-end">
+              <div class="stars" data-stars-for="L2"></div>
+              <div class="time-label">Best: <span data-time-for="L2">—</span></div>
+            </div>
+          </button>
+
+          <button class="level-card" data-level-id="L3">
+            <div>
+              <div class="level-name">Level 3</div>
+              <div class="level-desc">Choose numbers: 3 digits · 20 items</div>
+              <div class="level-chip">Mode: multiple choice</div>
+            </div>
+            <div class="text-end">
+              <div class="stars" data-stars-for="L3"></div>
+              <div class="time-label">Best: <span data-time-for="L3">—</span></div>
+            </div>
+          </button>
+
+          <button class="level-card" data-level-id="L4">
+            <div>
+              <div class="level-name">Level 4</div>
+              <div class="level-desc">Choose numbers: 4 &amp; 5 digits · 20 items</div>
+              <div class="level-chip">Mode: multiple choice</div>
+            </div>
+            <div class="text-end">
+              <div class="stars" data-stars-for="L4"></div>
+              <div class="time-label">Best: <span data-time-for="L4">—</span></div>
+            </div>
+          </button>
+
+          <button class="level-card" data-level-id="L5">
+            <div>
+              <div class="level-name">Level 5</div>
+              <div class="level-desc">Write numbers: 2 digits · 25 items</div>
+              <div class="level-chip">Mode: type what you hear</div>
+            </div>
+            <div class="text-end">
+              <div class="stars" data-stars-for="L5"></div>
+              <div class="time-label">Best: <span data-time-for="L5">—</span></div>
+            </div>
+          </button>
+
+          <button class="level-card" data-level-id="L6">
+            <div>
+              <div class="level-name">Level 6</div>
+              <div class="level-desc">Write numbers: 3 digits · 20 items</div>
+              <div class="level-chip">Mode: type what you hear</div>
+            </div>
+            <div class="text-end">
+              <div class="stars" data-stars-for="L6"></div>
+              <div class="time-label">Best: <span data-time-for="L6">—</span></div>
+            </div>
+          </button>
+
+          <button class="level-card" data-level-id="L7">
+            <div>
+              <div class="level-name">Level 7</div>
+              <div class="level-desc">Write numbers: 4 &amp; 5 digits · 20 items</div>
+              <div class="level-chip">Mode: type what you hear</div>
+            </div>
+            <div class="text-end">
+              <div class="stars" data-stars-for="L7"></div>
+              <div class="time-label">Best: <span data-time-for="L7">—</span></div>
+            </div>
+          </button>
+        </div>
+
+        <div id="audioWarning" class="mt-3" style="font-size:.75rem;color:var(--muted);">
+          🔈 Audio manifest not loaded yet. Trainer will still work, but without sound.
+          After you generate <code>audio/manifest.js</code> the numbers will play automatically.
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section id="screen-quiz" class="hidden">
+        <div class="quiz-header">
+          <button id="btnBackFromQuiz" class="btn btn-link btn-back">&larr; Menu</button>
+          <div class="text-end" style="font-size:.78rem;">
+            <div id="quizLevelName" class="text-muted">Level</div>
+            <div><span id="quizProgressLabel">0 / 0</span></div>
+          </div>
+        </div>
+
+        <div class="timer-pill">
+          ⏱ <span id="quizTimer">00:00</span>
+        </div>
+
+        <div class="question-card">
+          <div class="question-label">Listen</div>
+          <div id="quizPrompt" class="question-main">?</div>
+          <div id="quizDigitsInfo" class="question-sub">Number</div>
+          <button id="btnPlay" class="btn-sound">🔊 Play</button>
+        </div>
+
+        <div id="mcqWrap">
+          <div id="choicesBox" class="choices-grid"></div>
+        </div>
+
+        <div id="typedWrap" class="hidden">
+          <label for="typedAnswer" class="form-label mb-1" style="font-size:.75rem;color:var(--muted);">
+            Type the number you hear:
+          </label>
+          <input id="typedAnswer" type="text" class="form-control form-control-lg"
+                 inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+          <div class="d-flex gap-2 mt-2">
+            <button id="btnCheck" class="btn btn-success flex-grow-1">Check</button>
+            <button id="btnClear" class="btn btn-outline-light">Clear</button>
+          </div>
+        </div>
+
+        <div id="feedbackArea" class="mt-2 text-center"></div>
+
+        <div class="d-flex justify-content-between align-items-center mt-1" style="font-size:.78rem;">
+          <div>
+            <span class="badge-small">
+              ✅ Correct: <span id="quizCorrectCount">0</span> / <span id="quizTotalCount">0</span>
+            </span>
+          </div>
+          <button id="btnNext" class="btn btn-primary btn-sm px-3" disabled>Next ➜</button>
+        </div>
+      </section>
+
+      <!-- RESULT -->
+      <section id="screen-result" class="hidden">
+        <div class="result-wrap">
+          <div class="result-title" id="resultLevelTitle">Level done!</div>
+          <div class="result-sub" id="resultSummary"></div>
+
+          <div id="resultStars" class="stars stars-big mb-2"></div>
+
+          <div class="result-time">
+            Time: <span id="resultTime">00:00</span>
+          </div>
+          <div class="result-extra">
+            Correct on <span id="resultCorrect">0</span> items ·
+            Attempts: <span id="resultAttempts">0</span>
+          </div>
+
+          <div class="mb-2" style="font-size:.8rem;color:var(--muted);">
+            Faster = more stars. Try to beat your best time!
+          </div>
+
+          <button id="btnResultMenu" class="btn btn-primary w-100 mb-2">Back to menu</button>
+          <button id="btnResultRetry" class="btn btn-outline-light w-100">Retry level</button>
+        </div>
+      </section>
+    </main>
   </div>
+</div>
 
-  <!-- Manifest generated by Python (must define window.MANIFEST) -->
-  <script src="audio/manifest.js?v=4"></script>
-  <!-- Back-compat + cache-buster recovery loader -->
-  <script>
-    (async () => {
-      if (typeof window.MANIFEST === "undefined" && typeof MANIFEST !== "undefined") {
-        window.MANIFEST = MANIFEST;
+<!-- MEGA WIN OVERLAY -->
+<div id="megaWin" class="mega hidden">
+  <div class="mega-inner">
+    <div class="mega-title">MASTER OF NUMBERS</div>
+    <div class="mega-sub">You got 5★ on every level. Insane speed! 🚀</div>
+
+    <div class="mega-stars">
+      <span class="star full">★</span>
+      <span class="star full">★</span>
+      <span class="star full">★</span>
+      <span class="star full">★</span>
+      <span class="star full">★</span>
+    </div>
+
+    <button id="btnMegaClose" class="btn btn-light w-100 mt-1">OK, back to practice</button>
+  </div>
+</div>
+
+<!-- Shared audio player -->
+<audio id="audioPlayer" preload="auto"></audio>
+
+<!-- Optional: generated by generate_audio.py -->
+<script src="audio/manifest.js"></script>
+
+<script>
+(function(){
+  // --------- Levels config ---------
+  const LEVELS = [
+    // Level 1: choose numbers 1–2 digits, 16 items total
+    { id:'L1', label:'Level 1',
+      desc:'Choose 16 numbers (1–2 digits)',
+      mode:'mcq',
+      spec:[ {d:1,c:8}, {d:2,c:8} ]
+    },
+    // Level 2: choose 2-digit numbers, 25 items
+    { id:'L2', label:'Level 2',
+      desc:'Choose 25 numbers (2 digits)',
+      mode:'mcq',
+      spec:[ {d:2,c:25} ]
+    },
+    // Level 3: choose 3-digit numbers, 20 items
+    { id:'L3', label:'Level 3',
+      desc:'Choose 20 numbers (3 digits)',
+      mode:'mcq',
+      spec:[ {d:3,c:20} ]
+    },
+    // Level 4: choose 4- & 5-digit numbers, 10 + 10
+    { id:'L4', label:'Level 4',
+      desc:'Choose 10 × 4-digit + 10 × 5-digit',
+      mode:'mcq',
+      spec:[ {d:4,c:10}, {d:5,c:10} ]
+    },
+    // Level 5: write 2-digit numbers, 25 items
+    { id:'L5', label:'Level 5',
+      desc:'Write 25 numbers (2 digits)',
+      mode:'type',
+      spec:[ {d:2,c:25} ]
+    },
+    // Level 6: write 3-digit numbers, 20 items
+    { id:'L6', label:'Level 6',
+      desc:'Write 20 numbers (3 digits)',
+      mode:'type',
+      spec:[ {d:3,c:20} ]
+    },
+    // Level 7: write what you hear, 4- & 5-digit numbers, 10 + 10
+    { id:'L7', label:'Level 7',
+      desc:'Write 10 × 4-digit + 10 × 5-digit',
+      mode:'type',
+      spec:[ {d:4,c:10}, {d:5,c:10} ]
+    }
+  ];
+
+  const LEVEL_MAP = {};
+  LEVELS.forEach(l => LEVEL_MAP[l.id] = l);
+
+  // --------- Helpers ---------
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  function shuffle(a){
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+  function rnd(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+  }
+
+  function digitsRange(d){
+    if(d === 1) return [0,9];
+    const min = Math.pow(10,d-1);
+    const max = Math.pow(10,d)-1;
+    return [min,max];
+  }
+
+  function formatSeconds(sec){
+    if(!Number.isFinite(sec) || sec < 0) sec = 0;
+    const s = Math.floor(sec);
+    const m = Math.floor(s/60);
+    const r = s % 60;
+    return String(m).padStart(2,'0') + ':' + String(r).padStart(2,'0');
+  }
+
+  function renderStars(container, count, big){
+    container.innerHTML = '';
+    const n = Math.max(0, Math.min(5, count || 0));
+    for(let i=1;i<=5;i++){
+      const span = document.createElement('span');
+      span.className = 'star ' + (i<=n ? 'full' : 'empty');
+      if(big) span.classList.add('big');
+      span.textContent = '★';
+      if(big){
+        span.style.animationDelay = (i*0.08) + 's';
       }
-      if (!Array.isArray(window.MANIFEST)) {
-        try {
-          const url = "audio/manifest.js?nocache=" + Date.now();
-          const js  = await fetch(url, { cache: "no-store" }).then(r => {
-            if (!r.ok) throw new Error("HTTP " + r.status);
-            return r.text();
-          });
-          const fn = new Function(js + "; return window.MANIFEST || (typeof MANIFEST!=='undefined'?MANIFEST:undefined);");
-          const m  = fn();
-          if (Array.isArray(m)) {
-            window.MANIFEST = m;
-            console.log("✅ manifest recovered, items:", m.length);
-          } else {
-            throw new Error("manifest not array");
-          }
-        } catch (e) {
-          console.error("manifest fetch/eval failed:", e);
-          alert("Couldn’t load audio/manifest.js. Check path/case and that the audio folder is next to this HTML.");
-        }
-      }
-    })();
-  </script>
+      container.appendChild(span);
+    }
+  }
 
-  <!-- Bootstrap bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-          crossorigin="anonymous"></script>
+  // Time->stars: based only on how fast
+  function computeStars(level, seconds, totalItems){
+    if(!totalItems || !Number.isFinite(seconds) || seconds <= 0) return 1;
 
-  <script>
-    /* --------- NO ZOOM --------- */
-    document.addEventListener('gesturestart', e => e.preventDefault());
-    document.addEventListener('gesturechange', e => e.preventDefault());
-    document.addEventListener('gestureend', e => e.preventDefault());
-    window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive:false });
+    const maxDigits = level.spec.reduce((m,s)=>Math.max(m,s.d), 1);
+    let perItem;
+    if(level.mode === 'mcq'){
+      perItem = 4.0;          // 4 seconds per MCQ item baseline
+    }else{
+      perItem = (maxDigits <= 3) ? 6.0 : 8.0; // slower for longer numbers
+    }
+    const goal = perItem * totalItems;
+    const ratio = seconds / goal;
 
-    /* --------- CONFIG: Google Form (with Level field) --------- */
-    const FORM_URL   = "https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/formResponse";
-    const FIELD_NAME = "entry.1894172247"; // name
-    const FIELD_SCORE= "entry.18818728";   // score (number)
-    const FIELD_IP   = "entry.361885690";  // IP
-    const FIELD_LEVEL= "entry.64560435";   // Level_1 / Level_2 / Level_3 / Level_4 (or *_wip for checkpoint)
+    if(ratio <= 0.6) return 5;
+    if(ratio <= 0.8) return 4;
+    if(ratio <= 1.1) return 3;
+    if(ratio <= 1.4) return 2;
+    return 1;
+  }
 
-    /* --------- Level specs (target counts) --------- */
-    const LEVELS = {
-      L1: { label:"Level 1", key:"Level_1", desc:"30 × two-digit + 10 × one-digit", spec:[{d:2,c:30},{d:1,c:10}], mode:'mcq' },
-      L2: { label:"Level 2", key:"Level_2", desc:"10 × two-digit + 30 × three-digit", spec:[{d:2,c:10},{d:3,c:30}], mode:'mcq' },
-      L3: { label:"Level 3", key:"Level_3", desc:"Mix: 15 × three-digit + 15 × four-digit + 10 × five-digit", spec:[{d:3,c:15},{d:4,c:15},{d:5,c:10}], mode:'mcq' },
-      L4: { label:"Level 4", key:"Level_4", desc:"Type what you hear — 13 × three-digit + 13 × four-digit", spec:[{d:3,c:13},{d:4,c:13}], mode:'type' }
+  // --------- Local storage ---------
+  const STORE_KEY = 'number_trainer_v2';
+  let store;
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    store = {
+      bestStars: parsed.bestStars || {},
+      bestTimes: parsed.bestTimes || {},
+      totalRuns: parsed.totalRuns || {},
+      megaShown: !!parsed.megaShown
     };
+  }catch(e){
+    store = { bestStars:{}, bestTimes:{}, totalRuns:{}, megaShown:false };
+  }
+  function saveStore(){
+    try{
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    }catch(e){}
+  }
 
-    /* --------- Helpers --------- */
-    const $ = (s, r=document)=>r.querySelector(s);
-    const $$ = (s, r=document)=>[...r.querySelectorAll(s)];
-    const shuffle = (a)=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-    const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+  // --------- Manifest / audio ---------
+  let manifest = Array.isArray(window.MANIFEST) ? window.MANIFEST.slice() : [];
+  const audioWarningEl = $('#audioWarning');
+  function hasAudio(){
+    return Array.isArray(manifest) && manifest.length>0;
+  }
+  if(hasAudio()){
+    if(audioWarningEl) audioWarningEl.classList.add('hidden');
+  }
 
-    /* --------- UI Refs --------- */
-    const UI = {
-      tabL1: $('#tabL1'), tabL2: $('#tabL2'), tabL3: $('#tabL3'), tabL4: $('#tabL4'),
-      pillLevel: $('#pillLevel'), pillCount: $('#pillCount'), pillWarn: $('#pillWarn'),
-      bar: $('#bar'), liveScore: $('#liveScore'),
+  function findManifestItem(n){
+    if(!manifest) return null;
+    return manifest.find(x => x && x.number === n) || null;
+  }
 
-      paneStart: $('#paneStart'), paneQuiz: $('#paneQuiz'), paneDone: $('#paneDone'),
-      titleLevel: $('#titleLevel'), levelDesc: $('#levelDesc'), availInfo: $('#availInfo'),
-      nameInput: $('#nameInput'), btnStart: $('#btnStart'), btnResume: $('#btnResume'), btnReset: $('#btnReset'),
+  // --------- DOM refs ---------
+  const screenMenu   = $('#screen-menu');
+  const screenQuiz   = $('#screen-quiz');
+  const screenResult = $('#screen-result');
 
-      btnPlay: $('#btnPlay'), btnReplay: $('#btnReplay'), btnNext: $('#btnNext'), btnCheck: $('#btnCheck'),
-      player: $('#player'), choices: $('#choices'), answerWrap: $('#answerWrap'),
-      answerInput: $('#answerInput'), feedback: $('#feedback'), queueLeft: $('#queueLeft'),
+  const headerLevelText = $('#headerLevelText');
+  const globalProgressBar = $('#globalProgressBar');
+  const globalProgressLabel = $('#globalProgressLabel');
 
-      attemptsTotal: $('#attemptsTotal'), breakdown: $('#breakdown'), btnAgain: $('#btnAgain'), scorePct: $('#scorePct')
-    };
+  const quizLevelName = $('#quizLevelName');
+  const quizProgressLabel = $('#quizProgressLabel');
+  const quizTimer = $('#quizTimer');
+  const quizPrompt = $('#quizPrompt');
+  const quizDigitsInfo = $('#quizDigitsInfo');
+  const quizCorrectCount = $('#quizCorrectCount');
+  const quizTotalCount = $('#quizTotalCount');
 
-    /* --------- Audio error logger --------- */
-    UI.player.addEventListener('error', () => {
-      const e = UI.player.error;
-      console.warn('Audio error', e, 'src=', UI.player.currentSrc);
-      alert('Audio failed: ' + (e?.code || 'unknown') + '\n' + UI.player.currentSrc);
-    });
+  const mcqWrap = $('#mcqWrap');
+  const choicesBox = $('#choicesBox');
+  const typedWrap = $('#typedWrap');
+  const typedAnswer = $('#typedAnswer');
+  const feedbackArea = $('#feedbackArea');
 
-    /* --------- Profile (name, ip) --------- */
-    const STORE_KEY = "numtrainer_v4";
-    const profile = { name:"", ip:"unknown" };
+  const btnPlay = $('#btnPlay');
+  const btnNext = $('#btnNext');
+  const btnBackFromQuiz = $('#btnBackFromQuiz');
+  const btnCheck = $('#btnCheck');
+  const btnClear = $('#btnClear');
 
-    (function loadProfile(){
-      try{
-        const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
-        if(saved?.profile?.name) profile.name = saved.profile.name;
-        if(saved?.profile?.ip) profile.ip = saved.profile.ip;
-        UI.nameInput.value = profile.name || "";
-        UI.btnStart.disabled = UI.nameInput.value.trim().length < 2;
-      }catch(_){}
-      fetch("https://api.ipify.org?format=json",{cache:"no-store"}).then(r=>r.json()).then(d=>{
-        profile.ip = d.ip; saveAll();
-      }).catch(()=>{});
-    })();
+  const resultLevelTitle = $('#resultLevelTitle');
+  const resultSummary = $('#resultSummary');
+  const resultStars = $('#resultStars');
+  const resultTime = $('#resultTime');
+  const resultCorrect = $('#resultCorrect');
+  const resultAttempts = $('#resultAttempts');
+  const btnResultMenu = $('#btnResultMenu');
+  const btnResultRetry = $('#btnResultRetry');
 
-    UI.nameInput.addEventListener("input", ()=>{
-      UI.btnStart.disabled = UI.nameInput.value.trim().length < 2;
-    });
+  const audioEl = $('#audioPlayer');
 
-    /* --------- Per-level state --------- */
-    let cur = { id:"L1", total:0 };
-    const state = { L1: mkEmpty(), L2: mkEmpty(), L3: mkEmpty(), L4: mkEmpty() };
-    function mkEmpty(){
-      return { queue:[], completed:[], correctByDigits:{}, attempts:0, submitted:false, total:0, spec:[], _lastSubmittedAttempts:0, mode:'mcq' };
+  const megaWin = $('#megaWin');
+  const btnMegaClose = $('#btnMegaClose');
+
+  // --------- Confetti for mega win ---------
+  function buildConfetti(){
+    if(!megaWin) return;
+    const colors = ['#facc15','#4ade80','#38bdf8','#fb7185','#a855f7'];
+    for(let i=0;i<80;i++){
+      const s = document.createElement('span');
+      s.className = 'confetti';
+      s.style.left = (Math.random()*100) + '%';
+      s.style.top = (-20 - Math.random()*40) + 'vh';
+      s.style.background = colors[i % colors.length];
+      const dur = 4 + Math.random()*3;
+      const delay = (-Math.random()*5);
+      s.style.animationDuration = dur + 's';
+      s.style.animationDelay = delay + 's';
+      megaWin.appendChild(s);
     }
+  }
+  buildConfetti();
 
-    function saveAll(){
-      const blob = { profile, state };
-      localStorage.setItem(STORE_KEY, JSON.stringify(blob));
+  // --------- Screen switching ---------
+  function showScreen(name){
+    screenMenu.classList.add('hidden');
+    screenQuiz.classList.add('hidden');
+    screenResult.classList.add('hidden');
+
+    if(name === 'menu'){
+      screenMenu.classList.remove('hidden');
+      headerLevelText.textContent = 'Menu';
+    }else if(name === 'quiz'){
+      screenQuiz.classList.remove('hidden');
+    }else if(name === 'result'){
+      screenResult.classList.remove('hidden');
     }
-    function loadAll(){
-      try{
-        const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
-        if(saved?.state){
-          for(const k of ["L1","L2","L3","L4"]){
-            if(saved.state[k]){
-              state[k] = Object.assign(mkEmpty(), saved.state[k]);
-              state[k].queue = Array.isArray(state[k].queue)? state[k].queue : [];
-              state[k].completed = Array.isArray(state[k].completed)? state[k].completed : [];
-              state[k].correctByDigits = state[k].correctByDigits || {};
-              state[k].attempts = Number(state[k].attempts||0);
-              state[k].submitted = !!state[k].submitted;
-              state[k].total = Number(state[k].total||0);
-              state[k].spec = Array.isArray(state[k].spec)? state[k].spec : [];
-              state[k]._lastSubmittedAttempts = Number(state[k]._lastSubmittedAttempts||0);
-              state[k].mode = state[k].mode || (k==="L4" ? 'type' : 'mcq');
-            }
-          }
-        }
-      }catch(_){}
-    }
-    loadAll();
+  }
 
-    function setTab(activeId){
-      maybeSubmitCheckpoint(cur.id);
-      cur.id = activeId;
+  // --------- State of current run ---------
+  let current = null;
+  let timerId = null;
 
-      $$('.tab').forEach(t=>t.classList.remove('active'));
-      ({L1:UI.tabL1, L2:UI.tabL2, L3:UI.tabL3, L4:UI.tabL4}[activeId]).classList.add('active');
-
-      UI.pillLevel.textContent = LEVELS[cur.id].label;
-      UI.titleLevel.textContent = LEVELS[cur.id].label;
-      UI.levelDesc.textContent = LEVELS[cur.id].desc;
-
-      const st = state[cur.id];
-      const haveProgress = st.queue.length>0 || st.completed.length>0;
-      UI.btnResume.style.display = haveProgress ? 'inline-block' : 'none';
-      UI.btnReset.style.display  = haveProgress ? 'inline-block' : 'none';
-      UI.btnStart.textContent = haveProgress ? 'Start New' : 'Start';
-
-      updateHeader();
-      showPane('start');
-      inspectAvailability();
-    }
-
-    function showPane(name){
-      UI.paneStart.classList.toggle('hidden', name!=='start');
-      UI.paneQuiz.classList.toggle('hidden',  name!=='quiz');
-      UI.paneDone.classList.toggle('hidden',  name!=='done');
-    }
-
-    function updateHeader(){
-      const st = state[cur.id];
-      UI.pillCount.textContent = `Done ${st.completed.length} / ${st.total||0}`;
-      UI.liveScore.textContent = st.completed.length;
-      UI.queueLeft.textContent = st.queue.length;
-      const p = st.total? Math.round((st.completed.length/st.total)*100) : 0;
-      UI.bar.style.width = p+'%';
-    }
-
-    function warnMissing(show){ UI.pillWarn.style.display = show ? '' : 'none'; }
-
-    /* --------- Build queue for level from MANIFEST --------- */
-    function selectPool(spec){
-      const byD = {};
-      (Array.isArray(window.MANIFEST) ? window.MANIFEST : []).forEach(item=>{
-        (byD[item.digits] ||= []).push(item);
+  function buildQueue(level){
+    const byDigits = {};
+    if(Array.isArray(manifest)){
+      manifest.forEach(item=>{
+        if(!item) return;
+        const d = Number(item.digits || String(item.number||'').length || 0);
+        if(!byDigits[d]) byDigits[d] = [];
+        byDigits[d].push(item.number);
       });
-      const availability = spec.map(s => ({ d:s.d, need:s.c, have:(byD[s.d]||[]).length }));
-      let missing = false;
-      const queue = [];
-      for(const a of availability){
-        const pool = byD[a.d] || [];
-        if(a.have < a.need){ missing = true; }
-        const pick = Math.min(a.need, pool.length);
-        const take = shuffle(pool.slice()).slice(0, pick);
-        queue.push(...take);
-      }
-      warnMissing(missing);
-      return { queue: shuffle(queue), intendedTotal: spec.reduce((s,x)=>s+x.c,0), availability };
     }
 
-    function inspectAvailability(){
-      if(!Array.isArray(window.MANIFEST)){ UI.availInfo.textContent = 'Manifest missing. Run generator.'; return; }
-      const sel = selectPool(LEVELS[cur.id].spec);
-      const lines = sel.availability.map(a=>`${a.d}-digit: need ${a.need}, have ${a.have}`);
-      UI.availInfo.innerHTML = `<span class="${sel.availability.some(a=>a.have<a.need)?'warn':''}">Audio availability — ${lines.join(' · ')}</span>`;
-    }
+    const queue = [];
+    const missing = [];
 
-    /* --------- Start / Resume / Reset --------- */
-    UI.btnStart.addEventListener('click', ()=>{
-      profile.name = UI.nameInput.value.trim();
-      if(profile.name.length<2) return;
-      saveAll();
+    level.spec.forEach(part=>{
+      const d = part.d;
+      const count = part.c;
+      const pool = (byDigits[d] || []).slice();
+      shuffle(pool);
 
-      const sel = selectPool(LEVELS[cur.id].spec);
-      const st = state[cur.id] = mkEmpty();
-      st.queue = sel.queue.map(x=>x.number);
-      st.total = sel.intendedTotal;
-      st.spec  = LEVELS[cur.id].spec;
-      st.mode  = LEVELS[cur.id].mode || 'mcq';
-      saveAll();
-
-      beginQuiz();
-    });
-
-    UI.btnResume.addEventListener('click', ()=>{
-      profile.name = UI.nameInput.value.trim();
-      saveAll();
-      if(state[cur.id].queue.length===0 && state[cur.id].completed.length === (state[cur.id].total||0)){
-        renderDone();
-        showPane('done');
+      if(pool.length >= count){
+        queue.push(...pool.slice(0,count));
       }else{
-        beginQuiz(true);
-      }
-    });
-
-    UI.btnReset.addEventListener('click', ()=>{
-      state[cur.id] = mkEmpty();
-      saveAll();
-      setTab(cur.id);
-    });
-
-    /* --------- Quiz flow --------- */
-    UI.btnPlay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); UI.btnReplay.disabled=false; });
-    UI.btnReplay.addEventListener('click', ()=>{ UI.player.currentTime=0; UI.player.play().catch(()=>{}); });
-
-    // --- Level 4: Next should work without keyboard Enter
-    let typedChecked = false;
-
-    UI.btnNext.addEventListener('click', ()=>{
-      if (LEVELS[cur.id].mode === 'type') {
-        const hasVal = UI.answerInput.value.replace(/\s+/g,'').trim().length > 0;
-        if (!typedChecked) {
-          onCheckTyped();                // first press = "Check"
-          if (hasVal) {
-            typedChecked = true;         // now second press will advance
-          } else {
-            UI.answerInput.focus();      // no value: keep focus, stay on question
-          }
-          return;
+        if(pool.length > 0){
+          queue.push(...pool);
         }
-        // second press in typed mode = next question
-        typedChecked = false;
-        renderQuestion();
-      } else {
-        // MCQ: normal next
-        renderQuestion();
-      }
-    });
-
-    UI.btnCheck.addEventListener('click', onCheckTyped);
-    UI.answerInput.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter'){ e.preventDefault(); onCheckTyped(); typedChecked = true; }
-    });
-
-    function beginQuiz(resume=false){
-      showPane('quiz');
-      if(!resume) UI.feedback.innerHTML = '';
-      renderQuestion();
-    }
-
-    function renderQuestion(){
-      const st = state[cur.id];
-      if(st.queue.length===0){ renderDone(); return; }
-
-      const n = st.queue[0];
-      const item = (Array.isArray(window.MANIFEST) ? window.MANIFEST : []).find(x=>x.number===n);
-      const digits = String(n).length;
-
-      UI.pillLevel.textContent = LEVELS[cur.id].label;
-      UI.pillCount.textContent = `Done ${st.completed.length} / ${st.total}`;
-      UI.queueLeft.textContent = st.queue.length;
-      UI.bar.style.width = (st.total? Math.round((st.completed.length/st.total)*100) : 0) + '%';
-      UI.feedback.innerHTML = '';
-
-      // reset per-question
-      typedChecked = false;
-      UI.btnReplay.disabled = true;
-
-      // audio
-      UI.player.src = item?.file || '';
-      const pr = UI.player.play(); if(pr && pr.catch) pr.catch(()=>{});
-      UI.btnReplay.disabled = false;
-
-      // mode toggle
-      const typedMode = (LEVELS[cur.id].mode === 'type');
-      UI.choices.classList.toggle('hidden', typedMode);
-      UI.answerWrap.classList.toggle('hidden', !typedMode);
-
-      // Next button state
-      UI.btnNext.disabled = typedMode ? false : true;
-
-      if(typedMode){
-        UI.answerInput.value = "";
-        UI.answerInput.classList.remove('is-valid','is-invalid');
-        UI.answerInput.placeholder = (digits===3 || digits===4) ? `Type ${digits} digits` : 'Type the number';
-        setTimeout(()=>UI.answerInput.focus(), 50);
-      }else{
-        UI.choices.innerHTML = '';
-        const choices = makeChoices(digits, n);
-        choices.forEach(val=>{
-          const b = document.createElement('button');
-          b.className='choice';
-          b.type='button';
-          b.textContent=val;
-          b.onclick=()=> chooseMCQ(b, val, n, digits);
-          UI.choices.appendChild(b);
+        missing.push({digits:d, need:count, have:pool.length});
+        // fill with random numbers (no audio yet) so level still works
+        const [min,max] = digitsRange(d);
+        const set = new Set(pool);
+        while(set.size < count){
+          set.add(rnd(min,max));
+        }
+        set.forEach(n => {
+          if(!queue.includes(n)) queue.push(n);
         });
       }
-    }
-
-    function makeChoices(d, correct){
-      let min=0,max=9;
-      if(d===1){min=0;max=9}
-      else if(d===2){min=10;max=99}
-      else if(d===3){min=100;max=999}
-      else if(d===4){min=1000;max=9999}
-      else if(d===5){min=10000;max=99999}
-      const set = new Set([correct]);
-      while(set.size<4){ set.add(rnd(min,max)); }
-      return shuffle([...set]);
-    }
-
-    function chooseMCQ(btn, picked, correct, digits){
-      const st = state[cur.id];
-      $$('.choice', UI.choices).forEach(x=>x.disabled=true);
-      st.attempts++;
-
-      if(picked===correct){
-        btn.classList.add('correct');
-        if(!st.completed.includes(correct)){
-          st.completed.push(correct);
-          st.correctByDigits[digits] = (st.correctByDigits[digits]||0) + 1;
-        }
-        UI.feedback.innerHTML = '<div class="toastbox text-success">✅ Correct!</div>';
-        st.queue.shift();
-      }else{
-        btn.classList.add('wrong');
-        const hit = $$('.choice', UI.choices).find(x=>Number(x.textContent)===correct);
-        if(hit) hit.classList.add('correct');
-        UI.feedback.innerHTML = '<div class="toastbox text-danger">❌ Wrong. Will repeat later.</div>';
-        const curQ = st.queue.shift(); st.queue.push(curQ);
-      }
-      saveAll();
-
-      updateHeader();
-      UI.btnNext.disabled = false;
-      UI.btnReplay.disabled = false;
-    }
-
-    function onCheckTyped(){
-      if(LEVELS[cur.id].mode !== 'type') return;
-      const st = state[cur.id];
-      if(st.queue.length===0) return;
-
-      const n = st.queue[0];
-      const digits = String(n).length;
-      const raw = UI.answerInput.value.replace(/\s+/g,'').trim();
-      if(!raw) { UI.answerInput.focus(); return; }
-
-      const picked = Number(raw);
-      if(!Number.isFinite(picked)) { UI.answerInput.focus(); return; }
-
-      st.attempts++;
-
-      if(picked===n){
-        UI.answerInput.classList.remove('is-invalid');
-        UI.answerInput.classList.add('is-valid');
-        if(!st.completed.includes(n)){
-          st.completed.push(n);
-          st.correctByDigits[digits] = (st.correctByDigits[digits]||0) + 1;
-        }
-        UI.feedback.innerHTML = '<div class="toastbox text-success">✅ Correct!</div>';
-        st.queue.shift();
-      }else{
-        UI.answerInput.classList.remove('is-valid');
-        UI.answerInput.classList.add('is-invalid');
-        UI.feedback.innerHTML = '<div class="toastbox text-danger">❌ Wrong. Will repeat later.</div>';
-        const curQ = st.queue.shift(); st.queue.push(curQ);
-      }
-      saveAll();
-
-      updateHeader();
-      UI.btnNext.disabled = false;   // after check, Next is active
-      UI.btnReplay.disabled = false;
-    }
-
-    /* --------- Scores & Submissions --------- */
-    function levelTag(id){ return LEVELS[id].key; }                 // "Level_1"... "Level_4"
-    function levelTagWip(id){ return LEVELS[id].key + "_wip"; }     // "..._wip"
-    function computeAccuracy(st){ // checkpoint while in progress
-      const done = st.completed.length;
-      return Math.max(0, Math.round( (done / Math.max(st.attempts, 1)) * 100 ));
-    }
-    function computeFinal(st){ // when finished
-      const tot = st.total || 1;
-      return Math.max(1, Math.round( (tot / Math.max(st.attempts, tot)) * 100 ));
-    }
-
-    function submitToForm({name, score, ip, level, checkpoint=false}){
-      try{
-        const params = new URLSearchParams();
-        params.set(FIELD_NAME,  name);
-        params.set(FIELD_SCORE, String(score));
-        params.set(FIELD_IP,    ip || "unknown");
-        params.set(FIELD_LEVEL, checkpoint ? levelTagWip(level) : levelTag(level));
-
-        const body = new Blob([params.toString()], {type:"application/x-www-form-urlencoded;charset=UTF-8"});
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon(FORM_URL, body);
-        } else {
-          fetch(FORM_URL, { method:"POST", mode:"no-cors",
-            headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-            body: params.toString()
-          }).catch(()=>{});
-        }
-      }catch(_){}
-    }
-
-    function maybeSubmitCheckpoint(id){
-      if(!id) return;
-      const st = state[id];
-      if(!st) return;
-      if(st.attempts>0 && st.completed.length < (st.total||Infinity) && st.attempts !== st._lastSubmittedAttempts){
-        st._lastSubmittedAttempts = st.attempts;
-        const score = computeAccuracy(st);
-        submitToForm({ name: profile.name || "Anonymous", score, ip: profile.ip, level:id, checkpoint:true });
-        saveAll();
-      }
-    }
-
-    function renderDone(){
-      const st = state[cur.id];
-      showPane('done');
-      UI.attemptsTotal.textContent = st.attempts;
-      const score = computeFinal(st);
-      UI.scorePct.textContent = score;
-
-      const parts = [1,2,3,4,5].map(d => st.correctByDigits[d] ? `${d}-digit: <strong>${st.correctByDigits[d]}</strong>` : null).filter(Boolean);
-      UI.breakdown.innerHTML = parts.join(' · ') || '';
-
-      if(!st.submitted){
-        st.submitted = true;
-        submitToForm({ name: profile.name || "Anonymous", score, ip: profile.ip, level:cur.id, checkpoint:false });
-        saveAll();
-      }
-    }
-
-    UI.btnAgain.addEventListener('click', ()=>{
-      const sel = selectPool(LEVELS[cur.id].spec);
-      const st = state[cur.id] = mkEmpty();
-      st.queue = sel.queue.map(x=>x.number);
-      st.total = sel.intendedTotal;
-      st.spec  = LEVELS[cur.id].spec;
-      st.mode  = LEVELS[cur.id].mode || 'mcq';
-      saveAll();
-      beginQuiz();
     });
 
-    /* --------- Tabs --------- */
-    UI.tabL1.addEventListener('click', ()=> setTab('L1'));
-    UI.tabL2.addEventListener('click', ()=> setTab('L2'));
-    UI.tabL3.addEventListener('click', ()=> setTab('L3'));
-    UI.tabL4.addEventListener('click', ()=> setTab('L4'));
+    shuffle(queue);
+    return { queue, missing };
+  }
 
-    /* --------- Page lifecycle: checkpoint on hide/reload --------- */
-    document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ maybeSubmitCheckpoint(cur.id); }});
-    window.addEventListener('pagehide', ()=>{ maybeSubmitCheckpoint(cur.id); });
-    window.addEventListener('beforeunload', ()=>{ maybeSubmitCheckpoint(cur.id); });
+  function updateGlobalProgress(){
+    let sumStars = 0;
+    let maxStars = LEVELS.length * 5;
 
-    /* --------- Init --------- */
-    (function init(){
-      if(!Array.isArray(window.MANIFEST)){
-        alert('Missing audio/manifest.js (must set window.MANIFEST).');
+    LEVELS.forEach(l=>{
+      const s = (store.bestStars && store.bestStars[l.id]) || 0;
+      sumStars += s;
+      const starsEl = document.querySelector('[data-stars-for="'+l.id+'"]');
+      const timeEl = document.querySelector('[data-time-for="'+l.id+'"]');
+      if(starsEl){
+        renderStars(starsEl, s, false);
       }
-      if(UI.nameInput.value.trim().length>=2) UI.btnStart.disabled=false;
-      setTab('L1');
-    })();
-  </script>
+      if(timeEl){
+        const t = store.bestTimes && store.bestTimes[l.id];
+        timeEl.textContent = (typeof t === 'number' && t>0) ? formatSeconds(t) : '—';
+      }
+    });
+
+    const pct = maxStars ? Math.round((sumStars/maxStars)*100) : 0;
+    globalProgressBar.style.width = pct + '%';
+    globalProgressLabel.textContent = pct + '%';
+  }
+
+  function updateQuizHeader(){
+    if(!current) return;
+    const level = current.level;
+    const done = current.completed.size;
+    const total = current.total;
+    quizLevelName.textContent = level.label;
+    quizProgressLabel.textContent = done + ' / ' + total;
+    quizCorrectCount.textContent = done;
+    quizTotalCount.textContent = total;
+    headerLevelText.textContent = level.label;
+  }
+
+  function updateTimer(){
+    if(!current) return;
+    const now = performance.now();
+    const sec = (now - current.startTime)/1000;
+    quizTimer.textContent = formatSeconds(sec);
+  }
+
+  function playCurrentAudio(){
+    if(!current) return;
+    const n = current.currentNumber;
+    const item = findManifestItem(n);
+    if(!item || !item.file){
+      // no audio yet
+      return;
+    }
+    try{
+      audioEl.src = item.file;
+      audioEl.currentTime = 0;
+      const p = audioEl.play();
+      if(p && p.catch){ p.catch(()=>{}); }
+    }catch(e){}
+  }
+
+  function describeDigits(list){
+    const uniq = Array.from(new Set(list)).sort((a,b)=>a-b);
+    if(uniq.length === 1){
+      const d = uniq[0];
+      return d === 1 ? '1-digit number' : d + '-digit number';
+    }else{
+      return uniq[0] + '–' + uniq[uniq.length-1] + ' digit number';
+    }
+  }
+
+  function renderQuestion(){
+    if(!current) return;
+    const st = current;
+    if(st.queue.length === 0){
+      return finishLevel();
+    }
+
+    const n = st.queue[0];
+    st.currentNumber = n;
+    st.questionAnswered = false;
+
+    const digits = String(Math.abs(n)).length;
+    const digitsList = st.level.spec.map(x=>x.d);
+    const txtDigits = describeDigits(digitsList);
+
+    quizPrompt.textContent = '🔊';
+    quizDigitsInfo.textContent = txtDigits;
+    feedbackArea.textContent = '';
+
+    // mode
+    const typedMode = (st.level.mode === 'type');
+    mcqWrap.classList.toggle('hidden', typedMode);
+    typedWrap.classList.toggle('hidden', !typedMode);
+    btnNext.disabled = true;
+
+    if(typedMode){
+      typedAnswer.value = '';
+      typedAnswer.classList.remove('is-invalid','is-valid');
+      setTimeout(()=>typedAnswer.focus(), 80);
+    }
+
+    // build MCQ choices
+    if(!typedMode){
+      choicesBox.innerHTML = '';
+      const opts = buildOptions(n);
+      st.currentOptions = opts;
+      opts.forEach(val=>{
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice-btn';
+        btn.textContent = String(val);
+        btn.addEventListener('click', () => handleMCQClick(btn,val));
+        choicesBox.appendChild(btn);
+      });
+    }
+
+    // auto play audio if available
+    playCurrentAudio();
+    updateQuizHeader();
+  }
+
+  function buildOptions(correct){
+    const digits = String(Math.abs(correct)).length;
+
+    const fromManifest = manifest
+      .filter(x => x && Number(x.digits || String(x.number||'').length || 0) === digits)
+      .map(x => x.number);
+
+    const set = new Set([correct]);
+    if(fromManifest.length > 0){
+      while(set.size < 4 && fromManifest.length > 0){
+        const n = fromManifest[rnd(0, fromManifest.length-1)];
+        set.add(n);
+      }
+    }
+    while(set.size < 4){
+      const [min,max] = digitsRange(digits);
+      set.add(rnd(min,max));
+    }
+
+    const arr = Array.from(set);
+    return shuffle(arr);
+  }
+
+  function handleMCQClick(btn, picked){
+    if(!current || current.questionAnswered) return;
+    const st = current;
+    const correct = st.queue[0];
+
+    st.attempts++;
+
+    $$('.choice-btn').forEach(b => { b.disabled = true; });
+
+    if(picked === correct){
+      btn.classList.add('correct');
+      if(!st.completed.has(correct)){
+        st.completed.add(correct);
+      }
+      feedbackArea.innerHTML = '<span style="color:var(--accent);">✅ Correct!</span>';
+      st.queue.shift(); // remove
+    }else{
+      btn.classList.add('wrong');
+      feedbackArea.innerHTML = '<span style="color:var(--danger);">❌ Wrong, this number will come back later.</span>';
+      const q = st.queue.shift();
+      st.queue.push(q);
+    }
+
+    st.questionAnswered = true;
+    btnNext.disabled = false;
+    updateQuizHeader();
+  }
+
+  function handleCheckTyped(){
+    if(!current) return;
+    const st = current;
+
+    // if already checked and user presses again -> act like "Next"
+    if(st.questionAnswered){
+      btnNext.click();
+      return;
+    }
+
+    const raw = typedAnswer.value.trim();
+    const n = st.queue[0];
+
+    const val = Number(raw);
+    if(!raw || !Number.isFinite(val)){
+      typedAnswer.classList.add('is-invalid');
+      feedbackArea.innerHTML = '<span style="color:var(--warning);">⚠️ Type digits only.</span>';
+      return;
+    }
+
+    st.attempts++;
+
+    if(val === n){
+      typedAnswer.classList.remove('is-invalid');
+      typedAnswer.classList.add('is-valid');
+      feedbackArea.innerHTML = '<span style="color:var(--accent);">✅ Correct!</span>';
+      if(!st.completed.has(n)){
+        st.completed.add(n);
+      }
+      st.queue.shift();
+    }else{
+      typedAnswer.classList.remove('is-valid');
+      typedAnswer.classList.add('is-invalid');
+      feedbackArea.innerHTML = '<span style="color:var(--danger);">❌ Wrong, this number will repeat later.</span>';
+      const q = st.queue.shift();
+      st.queue.push(q);
+    }
+
+    st.questionAnswered = true;
+    btnNext.disabled = false;
+    updateQuizHeader();
+  }
+
+  function finishLevel(){
+    if(!current) return;
+    const st = current;
+
+    if(timerId){
+      clearInterval(timerId);
+      timerId = null;
+    }
+
+    const now = performance.now();
+    const elapsedSec = (now - st.startTime)/1000;
+    const lvl = st.level;
+    const totalItems = st.total;
+    const stars = computeStars(lvl, elapsedSec, totalItems);
+
+    // update store
+    const prevBest = (store.bestTimes && store.bestTimes[lvl.id]) || null;
+    if(prevBest === null || elapsedSec < prevBest){
+      store.bestTimes[lvl.id] = elapsedSec;
+    }
+    const prevStars = (store.bestStars && store.bestStars[lvl.id]) || 0;
+    if(stars > prevStars){
+      store.bestStars[lvl.id] = stars;
+    }
+    if(!store.totalRuns[lvl.id]) store.totalRuns[lvl.id] = 0;
+    store.totalRuns[lvl.id]++;
+    saveStore();
+
+    // update UI
+    updateGlobalProgress();
+
+    resultLevelTitle.textContent = lvl.label + ' complete!';
+    resultSummary.textContent = lvl.desc;
+    renderStars(resultStars, stars, true);
+
+    resultTime.textContent = formatSeconds(elapsedSec);
+    resultCorrect.textContent = st.completed.size;
+    resultAttempts.textContent = st.attempts;
+
+    showScreen('result');
+
+    // check mega win
+    checkMegaWin();
+  }
+
+  function checkMegaWin(){
+    const allFive = LEVELS.every(l => (store.bestStars && store.bestStars[l.id] || 0) >= 5);
+    if(allFive && !store.megaShown){
+      store.megaShown = true;
+      saveStore();
+      if(megaWin) megaWin.classList.remove('hidden');
+    }
+  }
+
+  // --------- Starting a level ---------
+  function startLevel(id){
+    const level = LEVEL_MAP[id];
+    if(!level) return;
+
+    const {queue, missing} = buildQueue(level);
+    if(!queue.length){
+      alert('No numbers available for this level. Check your audio manifest.');
+      return;
+    }
+
+    current = {
+      level,
+      queue: queue.slice(),
+      completed: new Set(),
+      total: queue.length,
+      attempts: 0,
+      currentNumber: null,
+      questionAnswered: false,
+      startTime: performance.now()
+    };
+
+    if(timerId){
+      clearInterval(timerId);
+    }
+    timerId = setInterval(updateTimer, 250);
+    quizTimer.textContent = '00:00';
+
+    // small warning if audio missing for some digit groups
+    if(missing && missing.length && audioWarningEl){
+      audioWarningEl.textContent = '⚠️ Audio missing for some numbers, but level will still work.';
+      audioWarningEl.classList.remove('hidden');
+    }else if(hasAudio() && audioWarningEl){
+      audioWarningEl.classList.add('hidden');
+    }
+
+    showScreen('quiz');
+    renderQuestion();
+  }
+
+  // --------- Event listeners ---------
+  // Level cards
+  $$('#levelsList .level-card').forEach(btn=>{
+    const id = btn.getAttribute('data-level-id');
+    btn.addEventListener('click', ()=> startLevel(id));
+  });
+
+  btnBackFromQuiz.addEventListener('click', ()=>{
+    if(timerId){
+      clearInterval(timerId);
+      timerId = null;
+    }
+    current = null;
+    showScreen('menu');
+    headerLevelText.textContent = 'Menu';
+  });
+
+  btnPlay.addEventListener('click', ()=>{
+    playCurrentAudio();
+  });
+
+  btnNext.addEventListener('click', ()=>{
+    if(!current) return;
+    renderQuestion();
+  });
+
+  btnCheck.addEventListener('click', handleCheckTyped);
+  btnClear.addEventListener('click', ()=>{
+    typedAnswer.value = '';
+    typedAnswer.classList.remove('is-invalid','is-valid');
+    typedAnswer.focus();
+  });
+
+  typedAnswer.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      handleCheckTyped();
+    }
+  });
+
+  btnResultMenu.addEventListener('click', ()=>{
+    showScreen('menu');
+    headerLevelText.textContent = 'Menu';
+  });
+
+  btnResultRetry.addEventListener('click', ()=>{
+    if(!current){
+      // retry last level from store? just go back to menu
+      showScreen('menu');
+      headerLevelText.textContent = 'Menu';
+      return;
+    }
+  });
+
+  btnMegaClose.addEventListener('click', ()=>{
+    megaWin.classList.add('hidden');
+  });
+
+  // --------- Init ---------
+  updateGlobalProgress();
+  showScreen('menu');
+})();
+</script>
 </body>
 </html>
