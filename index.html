@@ -776,26 +776,25 @@
     }
   }
 
-  // Time->stars: based only on how fast
-  function computeStars(level, seconds, totalItems){
-    if(!totalItems || !Number.isFinite(seconds) || seconds <= 0) return 1;
 
-    const maxDigits = level.spec.reduce((m,s)=>Math.max(m,s.d), 1);
-    let perItem;
-    if(level.mode === 'mcq'){
-      perItem = 4.0;          // 4 seconds per MCQ item baseline
-    }else{
-      perItem = (maxDigits <= 3) ? 6.0 : 8.0; // slower for longer numbers
-    }
-    const goal = perItem * totalItems;
-    const ratio = seconds / goal;
+// Time->stars: based only on how fast, using fixed goal times per level
+function computeStars(level, seconds, totalItems){
+  if(!Number.isFinite(seconds) || seconds <= 0) return 1;
 
-    if(ratio <= 0.6) return 5;
-    if(ratio <= 0.8) return 4;
-    if(ratio <= 1.1) return 3;
-    if(ratio <= 1.4) return 2;
-    return 1;
-  }
+  // Use your custom goal time for this level
+  const goal = LEVEL_GOAL_TIME[level.id] || 120; // fallback 2 min if missing
+
+  const ratio = seconds / goal;
+
+  // same thresholds as before
+  if (ratio <= 0.6) return 5;   // super fast
+  if (ratio <= 0.8) return 4;
+  if (ratio <= 1.1) return 3;
+  if (ratio <= 1.4) return 2;
+  return 1;
+}
+
+
 
   // --------- Local storage ---------
   const STORE_KEY = 'number_trainer_v2';
@@ -1185,6 +1184,16 @@
     const lvl = st.level;
     const totalItems = st.total;
     const stars = computeStars(lvl, elapsedSec, totalItems);
+    // Fixed goal time (in seconds) for each level
+const LEVEL_GOAL_TIME = {
+  L1: 70,   // 1:10
+  L2: 80,   // 1:20
+  L3: 130,  // 2:10
+  L4: 130,  // 2:10
+  L5: 150,  // 2:30
+  L6: 160,  // 2:40
+  L7: 300   // 5:00
+};
 
     // update store
     const prevBest = (store.bestTimes && store.bestTimes[lvl.id]) || null;
