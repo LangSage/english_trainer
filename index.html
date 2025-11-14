@@ -1174,25 +1174,58 @@
     updateQuizHeader();
   }
 
-  // --------- Google Form sending (STARS instead of score) ---------
-  const FORM_BASE = 'https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/viewform';
+// --------- Google Form sending (STARS instead of score, hidden) ---------
+// Use formResponse endpoint (not viewform)
+const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf_bAuHT1RQI_4gnRWyYrveE9XDccSaddRkxLaFSz9YLziTMQ/formResponse';
 
-  function sendResultToForm({name, stars, levelId, levelLabel, timeSeconds}){
-    const params = new URLSearchParams();
-    params.set('usp', 'pp_url');
-    // name
-    params.set('entry.1894172247', name || 'Anonymous');
-    // ⭐ stars go here instead of score
-    params.set('entry.18818728', String(stars));
-    // level info
-    params.set('entry.361885690', levelLabel + ' (' + levelId + ')');
-    // time in seconds
-    params.set('entry.64560435', String(Math.round(timeSeconds)));
-
-    const url = FORM_BASE + '?' + params.toString();
-    // open prefilled form in new tab; user can press Submit
-    window.open(url, '_blank', 'noopener,noreferrer');
+function sendResultToForm({name, stars, levelId, levelLabel, timeSeconds}){
+  // Make sure we have a hidden iframe as target
+  const iframeId = 'hiddenFormTarget';
+  let iframe = document.getElementById(iframeId);
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = iframeId;
+    iframe.name = iframeId;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
   }
+
+  // Remove any previous hidden form
+  const formId = 'hiddenGoogleFormSender';
+  let form = document.getElementById(formId);
+  if (form) {
+    form.remove();
+  }
+
+  // Create a new hidden form
+  form = document.createElement('form');
+  form.id = formId;
+  form.style.display = 'none';
+  form.method = 'POST';
+  form.action = FORM_URL;
+  form.target = iframeId;
+
+  function addField(fieldName, value){
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = fieldName;
+    input.value = value;
+    form.appendChild(input);
+  }
+
+  // Name
+  addField('entry.1894172247', name || 'Anonymous');
+  // ⭐ Stars (your "score" field)
+  addField('entry.18818728', String(stars));
+  // Level info
+  addField('entry.361885690', `${levelLabel} (${levelId})`);
+  // Time in seconds
+  addField('entry.64560435', String(Math.round(timeSeconds)));
+
+  document.body.appendChild(form);
+  form.submit(); // 🔥 sends silently, no new tab
+}
+
 
   // --------- Finish level ---------
   function finishLevel(){
