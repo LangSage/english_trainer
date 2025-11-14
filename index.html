@@ -779,29 +779,29 @@
   }
 
   // 🔹 Your fixed goal times (seconds) per level
-  const LEVEL_GOAL_TIME = {
-    L1: 70,   // 1:10
-    L2: 80,   // 1:20
-    L3: 130,  // 2:10
-    L4: 130,  // 2:10
-    L5: 150,  // 2:30
-    L6: 160,  // 2:40
-    L7: 300   // 5:00
-  };
+const LEVEL_5STAR_TIME = {
+  L1: 65,   // 1:05
+  L2: 80,   // 1:20
+  L3: 130,  // 2:10
+  L4: 145,  // 2:25
+  L5: 150,  // 2:30
+  L6: 170,  // 2:50
+  L7: 300   // 5:00
+};
 
-  // Time -> stars using your fixed per-level times
-  function computeStars(level, seconds, totalItems){
-    if(!Number.isFinite(seconds) || seconds <= 0) return 1;
+// Time -> stars using your 5★ times (much easier now)
+function computeStars(level, seconds, totalItems){
+  if (!Number.isFinite(seconds) || seconds <= 0) return 1;
 
-    const goal = LEVEL_GOAL_TIME[level.id] || (totalItems ? totalItems * 5 : 120);
-    const ratio = seconds / goal;
+  const base = LEVEL_5STAR_TIME[level.id] || (totalItems ? totalItems * 5 : 120);
+  const ratio = seconds / base;
 
-    // same thresholds as before
-    if (ratio <= 0.6) return 5;
-    if (ratio <= 0.8) return 4;
-    if (ratio <= 1.1) return 3;
-    if (ratio <= 1.4) return 2;
-    return 1;
+  // 5★ = your time or faster
+  if (ratio <= 1.0) return 5;         // <= base
+  if (ratio <= 1.3) return 4;         // up to +30% slower
+  if (ratio <= 1.7) return 3;         // up to +70% slower
+  if (ratio <= 2.1) return 2;         // up to +110% slower
+  return 1;                           // slower than 
   }
 
   // --------- Local storage ---------
