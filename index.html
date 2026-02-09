@@ -423,23 +423,25 @@
       pointer-events:none;
     }
 
-    @keyframes appShake {
-      0%   { transform: translate3d(0,0,0) rotate(0deg); }
-      10%  { transform: translate3d(-2px, 0, 0) rotate(-0.3deg); }
-      20%  { transform: translate3d( 2px, 0, 0) rotate( 0.3deg); }
-      30%  { transform: translate3d(-3px, 1px, 0) rotate(-0.4deg); }
-      40%  { transform: translate3d( 3px,-1px, 0) rotate( 0.4deg); }
-      50%  { transform: translate3d(-2px, 0, 0) rotate(-0.3deg); }
-      60%  { transform: translate3d( 2px, 0, 0) rotate( 0.3deg); }
-      70%  { transform: translate3d(-2px,-1px,0) rotate(-0.2deg); }
-      80%  { transform: translate3d( 2px, 1px,0) rotate( 0.2deg); }
-      90%  { transform: translate3d(-1px, 0,0) rotate(-0.1deg); }
-      100% { transform: translate3d(0,0,0) rotate(0deg); }
-    }
+@keyframes appShake {
+  0%   { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  8%   { transform: translate3d(-6px,  2px,0) rotate(-0.8deg) scale(1.01); }
+  16%  { transform: translate3d( 6px, -2px,0) rotate( 0.8deg) scale(1.01); }
+  24%  { transform: translate3d(-10px, 3px,0) rotate(-1.2deg) scale(1.015); }
+  32%  { transform: translate3d( 10px,-3px,0) rotate( 1.2deg) scale(1.015); }
+  40%  { transform: translate3d(-8px,  2px,0) rotate(-1.0deg) scale(1.012); }
+  48%  { transform: translate3d( 8px, -2px,0) rotate( 1.0deg) scale(1.012); }
+  56%  { transform: translate3d(-7px,  2px,0) rotate(-0.9deg) scale(1.010); }
+  64%  { transform: translate3d( 7px, -2px,0) rotate( 0.9deg) scale(1.010); }
+  72%  { transform: translate3d(-5px,  1px,0) rotate(-0.6deg) scale(1.006); }
+  80%  { transform: translate3d( 5px, -1px,0) rotate( 0.6deg) scale(1.006); }
+  90%  { transform: translate3d(-2px,  0px,0) rotate(-0.2deg) scale(1.002); }
+  100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+}
 
-    .shake-once {
-      animation: appShake 420ms ease-in-out;
-    }
+.shake-once {
+  animation: appShake 900ms cubic-bezier(.22, 1.1, .35, 1);
+}
 
     @keyframes megaPop{
       0%{ transform:scale(.7) translateY(40px); opacity:0;}
@@ -1455,3 +1457,4 @@
 </script>
 </body>
 </html>
+
