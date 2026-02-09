@@ -200,4 +200,11 @@ window.MANIFEST = [
     "file": "audio/n_51562.mp3",
     "digits": 5
   }
+    {
+    "number": 67,
+    "file": "audio/n_67.mp3",
+    "digits": 2
+  },
+
 ];
+
