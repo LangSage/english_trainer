@@ -598,7 +598,7 @@
           <button class="level-card" data-level-id="L2">
             <div>
               <div class="level-name">Level 2</div>
-              <div class="level-desc">Choose numbers: 2 digits · 25 items</div>
+              <div class="level-desc">Choose numbers: 2 digits · 26 items</div>
               <div class="level-chip">Mode: multiple choice</div>
             </div>
             <div class="text-end">
@@ -796,7 +796,7 @@
 (function(){
   const LEVELS = [
     { id:'L1', label:'Level 1', desc:'Choose 16 numbers (1–2 digits)', mode:'mcq',  spec:[ {d:1,c:8}, {d:2,c:8} ] },
-    { id:'L2', label:'Level 2', desc:'Choose 25 numbers (2 digits)',      mode:'mcq',  spec:[ {d:2,c:25} ] },
+    { id:'L2', label:'Level 2', desc:'Choose 26 numbers (2 digits)', mode:'mcq', spec:[ {d:2,c:26} ] },
     { id:'L3', label:'Level 3', desc:'Choose 20 numbers (3 digits)',      mode:'mcq',  spec:[ {d:3,c:20} ] },
     { id:'L4', label:'Level 4', desc:'Choose 10 × 4-digit + 10 × 5-digit',mode:'mcq',  spec:[ {d:4,c:10}, {d:5,c:10} ] },
     { id:'L5', label:'Level 5', desc:'Write 25 numbers (2 digits)',       mode:'type', spec:[ {d:2,c:25} ] },
@@ -1015,6 +1015,9 @@
     });
 
     shuffle(queue);
+    if (level.id === 'L2' && !queue.includes(67)) {
+  queue[0] = 67; // replaces one item so count stays the same
+}
     return { queue, missing };
   }
 
