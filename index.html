@@ -713,12 +713,6 @@
             </div>
           </div>
 
-          <!-- Keep your original buttons (unchanged) -->
-          <div class="d-flex gap-2 mt-2">
-            <button id="btnCheck" class="btn btn-success flex-grow-1">Check</button>
-            <button id="btnClear" class="btn btn-outline-light">Clear</button>
-          </div>
-        </div>
 
         <div id="feedbackArea" class="mt-2 text-center"></div>
 
@@ -1511,11 +1505,12 @@
     renderQuestion();
   });
 
-  btnCheck.addEventListener('click', handleCheckTyped);
+if (btnCheck) btnCheck.addEventListener('click', handleCheckTyped);
 
-  btnClear.addEventListener('click', ()=>{
-    clearTyped();
-  });
+if (btnClear) btnClear.addEventListener('click', () => {
+  clearTyped();
+});
+
 
   // keep Enter behavior (for desktop; mobile keyboard won't appear now anyway)
   typedAnswer.addEventListener('keydown', (e)=>{
@@ -1559,3 +1554,4 @@
 </script>
 </body>
 </html>
+
