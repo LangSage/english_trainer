@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>English Numbers Trainer — 1 to 100</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+        crossorigin="anonymous">
+
+  <style>
+    :root{
+      --bg:#050815;
+      --card:#0c1224;
+      --accent:#22c55e;
+      --accent-soft:rgba(34,197,94,.18);
+      --accent2:#3b82f6;
+      --border:#1c2742;
+      --text:#e5ecff;
+      --muted:#8c95b0;
+      --danger:#f87171;
+      --warning:#facc15;
+    }
+    *{box-sizing:border-box;}
+    html,body{
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(1200px 900px at -10% -20%, rgba(59,130,246,.18), transparent 45%),
+        radial-gradient(1200px 900px at 110% -10%, rgba(34,197,94,.12), transparent 45%),
+        var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-text-size-adjust:100%;
+      touch-action:manipulation;
+    }
+    body{display:flex;justify-content:center;}
+    .app{
+      width:100%;
+      max-width:640px;
+      min-height:100vh;
+      padding:8px 10px 16px;
+    }
+    .card-shell{
+      min-height:calc(100vh - 24px);
+      border-radius:22px;
+      background:
+        radial-gradient(900px 500px at -5% -10%, rgba(59,130,246,.16), transparent 35%),
+        radial-gradient(900px 500px at 110% -5%, rgba(34,197,94,.12), transparent 38%),
+        var(--card);
+      border:1px solid #141b31;
+      box-shadow:0 18px 60px rgba(0,0,0,.55);
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+    }
+    .hidden{display:none !important;}
+    .topbar{
+      padding:4px 2px 10px;
+      border-bottom:1px solid var(--border);
+      margin-bottom:10px;
+    }
+    .title{font-size:1.35rem;font-weight:800;letter-spacing:.02em;}
+    .subtitle{font-size:.78rem;color:var(--muted);}
+    .pill{
+      display:inline-flex;align-items:center;gap:.45rem;
+      padding:3px 10px;border-radius:999px;
+      background:#050816;border:1px solid #1f2937;color:var(--muted);font-size:.75rem;
+    }
+    .dot{width:7px;height:7px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 4px rgba(34,197,94,.16);}
+    .progress-wrap{margin-top:8px;}
+    .progress{height:12px;background:#050816;border-radius:999px;border:1px solid #1b243d;overflow:hidden;}
+    .progress-bar{background:linear-gradient(90deg, var(--accent2), var(--accent));}
+    .screen{flex:1;display:flex;flex-direction:column;}
+
+    .hero{
+      border-radius:18px;
+      border:1px solid #17203a;
+      background:linear-gradient(135deg, rgba(2,6,23,.96), rgba(10,16,33,.96));
+      padding:14px;
+      margin-bottom:10px;
+      box-shadow:0 10px 30px rgba(0,0,0,.4);
+    }
+    .hero h2{font-size:1.1rem;font-weight:800;margin:0 0 8px;}
+    .hero p{margin:0;font-size:.9rem;color:var(--muted);line-height:1.45;}
+    .hero-steps{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px;}
+    .step-card{
+      border-radius:14px;border:1px solid #192342;background:#08101f;padding:10px 12px;
+    }
+    .step-title{font-size:.84rem;font-weight:700;}
+    .step-text{font-size:.78rem;color:var(--muted);}
+
+    .levels-list{display:flex;flex-direction:column;gap:8px;margin-top:2px;}
+    .level-card{
+      width:100%;text-align:left;color:inherit;
+      border-radius:16px;border:1px solid #17203a;background:linear-gradient(135deg, rgba(8,13,28,.95), rgba(11,17,34,.96));
+      padding:11px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+      box-shadow:0 10px 26px rgba(0,0,0,.38);
+      transition:transform .08s ease, border-color .12s ease;
+    }
+    .level-card:hover{border-color:#21305a;}
+    .level-card:active{transform:scale(.985);}
+    .level-name{font-size:1rem;font-weight:800;}
+    .level-desc{font-size:.8rem;color:var(--muted);}
+    .level-chip{font-size:.72rem;color:#b8c0d8;margin-top:3px;}
+    .stars{display:flex;justify-content:flex-end;gap:2px;}
+    .star{font-size:.9rem;}
+    .star.full{color:#facc15;}
+    .star.empty{color:#243046;}
+    .time-label{font-size:.73rem;color:var(--muted);text-align:right;}
+
+    .quiz-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+    .btn-back{padding:0;color:var(--muted);font-size:.88rem;text-decoration:none;}
+    .timer-pill{margin-bottom:8px;}
+    .question-card{
+      border-radius:18px;border:1px solid #16203c;
+      background:
+        radial-gradient(700px 360px at 0% -40%, rgba(59,130,246,.25), transparent),
+        radial-gradient(700px 360px at 120% -10%, rgba(34,197,94,.18), transparent),
+        #040b17;
+      padding:16px 12px;text-align:center;margin-bottom:10px;
+    }
+    .question-label{font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+    .question-main{font-size:1.95rem;font-weight:900;margin-top:6px;text-shadow:0 4px 16px rgba(0,0,0,.6);}
+    .question-sub{font-size:.84rem;color:var(--muted);margin-top:4px;line-height:1.4;}
+    .btn-sound{
+      margin-top:10px;border-radius:999px;border:1px solid #24314f;background:#020617;color:var(--text);
+      padding:6px 16px;font-size:.9rem;
+    }
+    .btn-sound:active{transform:scale(.98);}
+
+    .choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+    .choice-btn{
+      border-radius:14px;border:1px solid #1f2a45;background:#030816;color:var(--text);
+      min-height:72px;padding:10px 6px;font-size:1.15rem;font-weight:800;
+      box-shadow:0 8px 20px rgba(0,0,0,.45);
+    }
+    .choice-btn small{display:block;font-size:.68rem;color:var(--muted);margin-top:3px;font-weight:600;}
+    .choice-btn.correct{border-color:var(--accent);background:rgba(34,197,94,.09);}
+    .choice-btn.wrong{border-color:var(--danger);background:rgba(248,113,113,.08);}
+
+    .typed-wrap input{
+      text-align:center;font-size:1.45rem;letter-spacing:.04em;background:#020617;color:var(--text);
+      border:1px solid #23304f;
+    }
+    .keypad{margin-top:10px;}
+    .keypad-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}
+    .key-btn{
+      border:none;border-radius:14px;background:#08101f;color:var(--text);padding:14px 0;
+      font-size:1.15rem;font-weight:800;box-shadow:0 8px 18px rgba(0,0,0,.3);
+    }
+    .key-btn.secondary{background:#121a2f;font-size:.95rem;}
+    .key-btn.danger{color:#fecaca;}
+    .key-btn.action{grid-column:1 / -1;background:linear-gradient(135deg, var(--accent2), var(--accent));}
+    .feedback{min-height:24px;font-size:.92rem;text-align:center;margin-top:8px;}
+    .feedback.good{color:#b7f7cd;}
+    .feedback.bad{color:#fecaca;}
+    .feedback.warn{color:#fde68a;}
+    .badge-small{display:inline-flex;align-items:center;gap:.35rem;padding:3px 10px;border-radius:999px;background:#040915;border:1px solid #1c2640;font-size:.75rem;color:var(--muted);}
+
+    .result-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px;}
+    .result-title{font-size:1.45rem;font-weight:800;}
+    .result-sub{font-size:.92rem;color:var(--muted);margin-top:4px;}
+    .result-meta{margin-top:10px;font-size:1rem;}
+    .btn-primary{
+      background:linear-gradient(135deg, var(--accent2), var(--accent));border:none;
+    }
+    .stars-big .star{font-size:1.65rem;}
+
+    .warning-box{
+      margin-top:10px;border-radius:14px;padding:10px 12px;background:#0a101f;border:1px solid #1c2540;color:var(--muted);font-size:.78rem;
+    }
+    .help-note{margin-top:10px;font-size:.78rem;color:var(--muted);text-align:center;}
+
+    @media (max-width:520px){
+      .app{padding:6px 8px 12px;}
+      .card-shell{padding:10px;}
+      .question-main{font-size:1.7rem;}
+      .choice-btn{font-size:1.02rem;min-height:68px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card-shell">
+      <header class="topbar">
+        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+          <div>
+            <div class="title">English Numbers Trainer</div>
+            <div class="subtitle">Learn numbers from 1 to 100 by listening</div>
+          </div>
+          <div class="pill"><span class="dot"></span> <span id="headerText">0 / 7 levels with stars</span></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress">
+            <div id="globalProgressBar" class="progress-bar" role="progressbar" style="width:0%"></div>
+          </div>
+          <div class="subtitle mt-1"><span id="globalProgressLabel">0%</span> completed</div>
+        </div>
+      </header>
+
+      <main class="screen">
+        <section id="screen-menu">
+          <div class="hero">
+            <h2>Simple order for learning</h2>
+            <p>First students hear <strong>1–20</strong>. Then they practice <strong>10, 20, 30 ... 100</strong>. After that, mixed numbers become much easier.</p>
+            <div class="hero-steps">
+              <div class="step-card">
+                <div class="step-title">Step 1 — Basic numbers</div>
+                <div class="step-text">Train 1–10 and 11–20 with easy multiple choice.</div>
+              </div>
+              <div class="step-card">
+                <div class="step-title">Step 2 — Tens pattern</div>
+                <div class="step-text">Practice ten, twenty, thirty ... one hundred.</div>
+              </div>
+              <div class="step-card">
+                <div class="step-title">Step 3 — Mixed numbers</div>
+                <div class="step-text">Move to 21–99 and then full 1–100 typing practice.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="levels-list" id="levelsList"></div>
+
+          <div id="audioWarning" class="warning-box hidden">
+            Audio files are not ready yet. The trainer can still use the browser voice as a fallback, but for stable playback on GitHub Pages it is better to run <code>generate_audio.py</code> first.
+          </div>
+          <div class="help-note">Tip: after uploading to GitHub Pages, each level works on phones too.</div>
+        </section>
+
+        <section id="screen-quiz" class="hidden">
+          <div class="quiz-header">
+            <button id="btnBackMenu" class="btn btn-link btn-back">&larr; Menu</button>
+            <div class="text-end" style="font-size:.8rem;">
+              <div id="quizLevelName" class="subtitle">Level</div>
+              <div><span id="quizProgressLabel">0 / 0</span></div>
+            </div>
+          </div>
+
+          <div class="timer-pill pill">⏱ <span id="quizTimer">00:00</span></div>
+
+          <div class="question-card">
+            <div class="question-label">Listen</div>
+            <div id="quizPrompt" class="question-main">🔊</div>
+            <div id="quizSub" class="question-sub">Tap play and choose the correct number.</div>
+            <button id="btnPlay" class="btn-sound">🔊 Play</button>
+          </div>
+
+          <div id="mcqWrap">
+            <div id="choicesBox" class="choices-grid"></div>
+          </div>
+
+          <div id="typedWrap" class="typed-wrap hidden">
+            <label for="typedAnswer" class="form-label mb-1" style="font-size:.78rem;color:var(--muted);">Type the number you hear:</label>
+            <input id="typedAnswer" type="text" class="form-control form-control-lg" readonly inputmode="none" autocomplete="off" />
+            <div class="keypad">
+              <div class="keypad-grid">
+                <button class="key-btn" data-key="1">1</button>
+                <button class="key-btn" data-key="2">2</button>
+                <button class="key-btn" data-key="3">3</button>
+                <button class="key-btn" data-key="4">4</button>
+                <button class="key-btn" data-key="5">5</button>
+                <button class="key-btn" data-key="6">6</button>
+                <button class="key-btn" data-key="7">7</button>
+                <button class="key-btn" data-key="8">8</button>
+                <button class="key-btn" data-key="9">9</button>
+                <button class="key-btn secondary danger" data-action="backspace">⌫</button>
+                <button class="key-btn" data-key="0">0</button>
+                <button class="key-btn secondary" data-action="clear">Clear</button>
+                <button class="key-btn action" data-action="check">✅ Check</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="feedbackArea" class="feedback"></div>
+
+          <div class="d-flex justify-content-between align-items-center mt-2" style="font-size:.8rem;gap:8px;">
+            <span class="badge-small">✅ Correct: <span id="quizCorrect">0</span> / <span id="quizTotal">0</span></span>
+            <button id="btnNext" class="btn btn-primary btn-sm px-3" disabled>Next ➜</button>
+          </div>
+        </section>
+
+        <section id="screen-result" class="hidden">
+          <div class="result-wrap">
+            <div id="resultTitle" class="result-title">Level complete!</div>
+            <div id="resultSub" class="result-sub">Nice work.</div>
+            <div id="resultStars" class="stars stars-big mt-3 mb-2"></div>
+            <div class="result-meta">Time: <span id="resultTime">00:00</span></div>
+            <div class="result-sub">Correct on <span id="resultCorrect">0</span> items · Attempts: <span id="resultAttempts">0</span></div>
+            <button id="btnResultMenu" class="btn btn-primary w-100 mt-3 mb-2">Back to menu</button>
+            <button id="btnRetry" class="btn btn-outline-light w-100">Retry level</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <audio id="audioPlayer" preload="auto"></audio>
+  <script src="manifest.js"></script>
+  <script>
+  (function(){
+    const LEVELS = [
+      { id:'L1', label:'Level 1', desc:'Choose numbers 1–10', mode:'mcq', items: pickRange(1,10,15) },
+      { id:'L2', label:'Level 2', desc:'Choose numbers 11–20', mode:'mcq', items: pickRange(11,20,15) },
+      { id:'L3', label:'Level 3', desc:'Choose 10, 20, 30 ... 100', mode:'mcq', items: [10,20,30,40,50,60,70,80,90,100,20,30,40,50,60] },
+      { id:'L4', label:'Level 4', desc:'Choose mixed numbers 21–99', mode:'mcq', items: mixedSet(21,99,20) },
+      { id:'L5', label:'Level 5', desc:'Type numbers 1–20', mode:'type', items: mixedSet(1,20,18) },
+      { id:'L6', label:'Level 6', desc:'Type 10, 20, 30 ... 100', mode:'type', items: [10,20,30,40,50,60,70,80,90,100,20,40,60,80,100] },
+      { id:'L7', label:'Level 7', desc:'Type mixed numbers 1–100', mode:'type', items: mixedSet(1,100,24) }
+    ];
+
+    const LEVEL_TARGETS = { L1:50, L2:55, L3:55, L4:80, L5:90, L6:70, L7:120 };
+    const STORE_KEY = 'english_numbers_trainer_1_100_v1';
+    const DEFAULT_MANIFEST = Array.isArray(window.MANIFEST) ? window.MANIFEST.slice() : buildFallbackManifest();
+    const MANIFEST_BY_NUMBER = new Map(DEFAULT_MANIFEST.map(x => [Number(x.number), x]));
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+
+    const screenMenu = $('#screen-menu');
+    const screenQuiz = $('#screen-quiz');
+    const screenResult = $('#screen-result');
+    const levelsList = $('#levelsList');
+    const headerText = $('#headerText');
+    const globalProgressBar = $('#globalProgressBar');
+    const globalProgressLabel = $('#globalProgressLabel');
+    const quizLevelName = $('#quizLevelName');
+    const quizProgressLabel = $('#quizProgressLabel');
+    const quizTimer = $('#quizTimer');
+    const quizSub = $('#quizSub');
+    const btnPlay = $('#btnPlay');
+    const choicesBox = $('#choicesBox');
+    const mcqWrap = $('#mcqWrap');
+    const typedWrap = $('#typedWrap');
+    const typedAnswer = $('#typedAnswer');
+    const feedbackArea = $('#feedbackArea');
+    const btnNext = $('#btnNext');
+    const quizCorrect = $('#quizCorrect');
+    const quizTotal = $('#quizTotal');
+    const resultTitle = $('#resultTitle');
+    const resultSub = $('#resultSub');
+    const resultStars = $('#resultStars');
+    const resultTime = $('#resultTime');
+    const resultCorrect = $('#resultCorrect');
+    const resultAttempts = $('#resultAttempts');
+    const audioPlayer = $('#audioPlayer');
+    const audioWarning = $('#audioWarning');
+
+    const store = loadStore();
+    let state = null;
+
+    function pickRange(min, max, repeat){
+      const arr = [];
+      for(let n=min;n<=max;n++) arr.push(n);
+      const out = [];
+      while(out.length < repeat){
+        out.push(arr[out.length % arr.length]);
+      }
+      return shuffle(out.slice());
+    }
+
+    function mixedSet(min, max, count){
+      const pool = [];
+      for(let n=min;n<=max;n++) pool.push(n);
+      shuffle(pool);
+      const out = pool.slice(0, Math.min(count, pool.length));
+      while(out.length < count){
+        out.push(pool[out.length % pool.length]);
+      }
+      return shuffle(out.slice());
+    }
+
+    function shuffle(a){
+      const arr = a.slice();
+      for(let i=arr.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function formatSeconds(sec){
+      sec = Math.max(0, Math.floor(sec || 0));
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+
+    function buildFallbackManifest(){
+      const list = [];
+      for(let n=1;n<=100;n++){
+        list.push({ number:n, text:numberToWords(n), file:'audio/n_' + n + '.mp3' });
+      }
+      return list;
+    }
+
+    function numberToWords(n){
+      const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+      const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+      const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+      n = Number(n);
+      if(n <= 0) return 'zero';
+      if(n < 10) return ones[n];
+      if(n < 20) return teens[n - 10];
+      if(n < 100){
+        const t = Math.floor(n / 10);
+        const r = n % 10;
+        return r ? tens[t] + '-' + ones[r] : tens[t];
+      }
+      if(n === 100) return 'one hundred';
+      return String(n);
+    }
+
+    function renderStars(container, value){
+      container.innerHTML = '';
+      const stars = Math.max(0, Math.min(5, Number(value) || 0));
+      for(let i=1;i<=5;i++){
+        const span = document.createElement('span');
+        span.className = 'star ' + (i <= stars ? 'full' : 'empty');
+        span.textContent = '★';
+        container.appendChild(span);
+      }
+    }
+
+    function loadStore(){
+      try{
+        const raw = localStorage.getItem(STORE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return {
+          bestStars: parsed.bestStars || {},
+          bestTimes: parsed.bestTimes || {},
+          runs: parsed.runs || {}
+        };
+      }catch(e){
+        return { bestStars:{}, bestTimes:{}, runs:{} };
+      }
+    }
+
+    function saveStore(){
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    }
+
+    function computeStars(levelId, seconds){
+      const target = LEVEL_TARGETS[levelId] || 90;
+      if(seconds <= target) return 5;
+      if(seconds <= target * 1.25) return 4;
+      if(seconds <= target * 1.55) return 3;
+      if(seconds <= target * 1.9) return 2;
+      return 1;
+    }
+
+    function overallProgress(){
+      const done = LEVELS.filter(level => (store.bestStars[level.id] || 0) > 0).length;
+      return { done, total: LEVELS.length, percent: Math.round((done / LEVELS.length) * 100) };
+    }
+
+    function renderMenu(){
+      levelsList.innerHTML = '';
+      LEVELS.forEach(level => {
+        const btn = document.createElement('button');
+        btn.className = 'level-card';
+        btn.type = 'button';
+        btn.innerHTML = `
+          <div>
+            <div class="level-name">${level.label}</div>
+            <div class="level-desc">${level.desc}</div>
+            <div class="level-chip">Mode: ${level.mode === 'mcq' ? 'listen and choose' : 'listen and type'}</div>
+          </div>
+          <div class="text-end">
+            <div class="stars" data-level="${level.id}"></div>
+            <div class="time-label">Best: ${store.bestTimes[level.id] ? formatSeconds(store.bestTimes[level.id]) : '—'}</div>
+          </div>
+        `;
+        btn.addEventListener('click', () => startLevel(level.id));
+        levelsList.appendChild(btn);
+        renderStars(btn.querySelector('.stars'), store.bestStars[level.id] || 0);
+      });
+
+      const summary = overallProgress();
+      headerText.textContent = `${summary.done} / ${summary.total} levels with stars`;
+      globalProgressBar.style.width = summary.percent + '%';
+      globalProgressLabel.textContent = summary.percent + '%';
+      audioWarning.classList.remove('hidden');
+    }
+
+    function showScreen(name){
+      screenMenu.classList.toggle('hidden', name !== 'menu');
+      screenQuiz.classList.toggle('hidden', name !== 'quiz');
+      screenResult.classList.toggle('hidden', name !== 'result');
+    }
+
+    function startLevel(levelId){
+      const level = LEVELS.find(x => x.id === levelId);
+      if(!level) return;
+      state = {
+        level,
+        items: shuffle(level.items),
+        index: 0,
+        correct: 0,
+        attempts: 0,
+        answered: false,
+        timerStart: Date.now(),
+        timerHandle: null,
+        currentNumber: null,
+        lastSpeech: 0
+      };
+
+      quizLevelName.textContent = level.label;
+      quizTotal.textContent = String(state.items.length);
+      typedAnswer.value = '';
+      feedbackArea.textContent = '';
+      feedbackArea.className = 'feedback';
+      btnNext.disabled = true;
+      typedWrap.classList.toggle('hidden', level.mode !== 'type');
+      mcqWrap.classList.toggle('hidden', level.mode !== 'mcq');
+      showScreen('quiz');
+      updateTimer();
+      if(state.timerHandle) clearInterval(state.timerHandle);
+      state.timerHandle = setInterval(updateTimer, 1000);
+      renderQuestion();
+    }
+
+    function updateTimer(){
+      if(!state) return;
+      const sec = Math.floor((Date.now() - state.timerStart) / 1000);
+      quizTimer.textContent = formatSeconds(sec);
+    }
+
+    function renderQuestion(){
+      if(!state) return;
+      const total = state.items.length;
+      if(state.index >= total){
+        finishLevel();
+        return;
+      }
+      state.answered = false;
+      state.currentNumber = Number(state.items[state.index]);
+      typedAnswer.value = '';
+      feedbackArea.textContent = '';
+      feedbackArea.className = 'feedback';
+      btnNext.disabled = true;
+      quizProgressLabel.textContent = `${state.index + 1} / ${total}`;
+      quizCorrect.textContent = String(state.correct);
+      quizSub.innerHTML = state.level.mode === 'mcq'
+        ? 'Tap play and choose the correct number.'
+        : 'Tap play and type the number you hear.';
+
+      if(state.level.mode === 'mcq') renderChoices(state.currentNumber);
+      setTimeout(() => playNumber(state.currentNumber), 120);
+    }
+
+    function renderChoices(correctNumber){
+      const pool = new Set([correctNumber]);
+      const levelItems = state.level.items.slice();
+      const sameTens = levelItems.filter(n => n !== correctNumber && Math.abs(n - correctNumber) <= 10);
+      const fallback = buildNearbyPool(correctNumber);
+      shuffle(sameTens.concat(fallback)).forEach(n => {
+        if(pool.size < 4 && n >= 1 && n <= 100) pool.add(Number(n));
+      });
+      while(pool.size < 4){
+        pool.add(randomInt(1,100));
+      }
+      const options = shuffle(Array.from(pool));
+      choicesBox.innerHTML = '';
+      options.forEach(n => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.type = 'button';
+        btn.dataset.number = String(n);
+        btn.innerHTML = `${n}<small>${numberToWords(n)}</small>`;
+        btn.addEventListener('click', () => answerMcq(n, btn));
+        choicesBox.appendChild(btn);
+      });
+    }
+
+    function buildNearbyPool(n){
+      const list = [];
+      const offsets = [-20,-10,-9,-5,-2,-1,1,2,5,9,10,20];
+      offsets.forEach(off => {
+        const value = n + off;
+        if(value >= 1 && value <= 100) list.push(value);
+      });
+      if(n >= 20 && n <= 99){
+        const ones = n % 10;
+        const tenBase = Math.floor(n / 10) * 10;
+        [tenBase, tenBase + 1, tenBase + 2, tenBase + 8, tenBase + 9].forEach(v => {
+          if(v >= 1 && v <= 100) list.push(v);
+        });
+        [10 + ones, 20 + ones, 30 + ones, 40 + ones, 50 + ones, 60 + ones, 70 + ones, 80 + ones, 90 + ones]
+          .forEach(v => { if(v >= 1 && v <= 100) list.push(v); });
+      }
+      if(n % 10 === 0){
+        [10,20,30,40,50,60,70,80,90,100].forEach(v => { if(v !== n) list.push(v); });
+      }
+      return shuffle(list);
+    }
+
+    function answerMcq(value, btn){
+      if(!state || state.answered) return;
+      state.answered = true;
+      state.attempts += 1;
+      const correct = state.currentNumber;
+      const buttons = $$('#choicesBox .choice-btn');
+      buttons.forEach(el => {
+        const num = Number(el.dataset.number || 0);
+        if(num === correct) el.classList.add('correct');
+      });
+
+      if(Number(value) === correct){
+        state.correct += 1;
+        btn.classList.add('correct');
+        feedbackArea.textContent = `✅ Correct — ${correct} = ${numberToWords(correct)}`;
+        feedbackArea.className = 'feedback good';
+      }else{
+        btn.classList.add('wrong');
+        feedbackArea.textContent = `❌ Correct answer: ${correct} = ${numberToWords(correct)}`;
+        feedbackArea.className = 'feedback bad';
+      }
+      quizCorrect.textContent = String(state.correct);
+      btnNext.disabled = false;
+    }
+
+    function checkTyped(){
+      if(!state || state.answered) return;
+      const raw = typedAnswer.value.trim();
+      if(!/^\d+$/.test(raw)){
+        feedbackArea.textContent = '⚠️ Type digits only.';
+        feedbackArea.className = 'feedback warn';
+        return;
+      }
+      state.answered = true;
+      state.attempts += 1;
+      const value = Number(raw);
+      const correct = state.currentNumber;
+      if(value === correct){
+        state.correct += 1;
+        feedbackArea.textContent = `✅ Correct — ${correct} = ${numberToWords(correct)}`;
+        feedbackArea.className = 'feedback good';
+      }else{
+        feedbackArea.textContent = `❌ Correct answer: ${correct} = ${numberToWords(correct)}`;
+        feedbackArea.className = 'feedback bad';
+      }
+      quizCorrect.textContent = String(state.correct);
+      btnNext.disabled = false;
+    }
+
+    function nextQuestion(){
+      if(!state || !state.answered) return;
+      state.index += 1;
+      renderQuestion();
+    }
+
+    function finishLevel(){
+      if(!state) return;
+      clearInterval(state.timerHandle);
+      const seconds = Math.floor((Date.now() - state.timerStart) / 1000);
+      const stars = computeStars(state.level.id, seconds);
+      const prevStars = store.bestStars[state.level.id] || 0;
+      const prevTime = store.bestTimes[state.level.id];
+      store.bestStars[state.level.id] = Math.max(prevStars, stars);
+      if(prevTime == null || seconds < prevTime) store.bestTimes[state.level.id] = seconds;
+      store.runs[state.level.id] = (store.runs[state.level.id] || 0) + 1;
+      saveStore();
+      renderMenu();
+
+      resultTitle.textContent = `${state.level.label} complete!`;
+      resultSub.textContent = `${state.correct} correct out of ${state.items.length}.`;
+      resultTime.textContent = formatSeconds(seconds);
+      resultCorrect.textContent = String(state.correct);
+      resultAttempts.textContent = String(state.attempts);
+      renderStars(resultStars, stars);
+      showScreen('result');
+    }
+
+    async function playNumber(n){
+      const item = MANIFEST_BY_NUMBER.get(Number(n)) || { number:n, text:numberToWords(n), file:'audio/n_' + n + '.mp3' };
+      const wordText = item.text || numberToWords(n);
+      const useFile = item.file;
+      const now = Date.now();
+      state && (state.lastSpeech = now);
+
+      if(useFile){
+        try{
+          audioPlayer.pause();
+          audioPlayer.currentTime = 0;
+          audioPlayer.src = useFile;
+          await audioPlayer.play();
+          return;
+        }catch(err){
+          // fallback to speech synthesis
+        }
+      }
+      if('speechSynthesis' in window){
+        try{
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(wordText);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.92;
+          window.speechSynthesis.speak(utterance);
+        }catch(err){
+          console.warn(err);
+        }
+      }
+    }
+
+    function randomInt(min, max){
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    $('#btnBackMenu').addEventListener('click', () => {
+      if(state && state.timerHandle) clearInterval(state.timerHandle);
+      state = null;
+      showScreen('menu');
+    });
+    btnPlay.addEventListener('click', () => {
+      if(state) playNumber(state.currentNumber);
+    });
+    btnNext.addEventListener('click', nextQuestion);
+    $('#btnResultMenu').addEventListener('click', () => showScreen('menu'));
+    $('#btnRetry').addEventListener('click', () => state && startLevel(state.level.id));
+
+    $$('.key-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        const action = btn.dataset.action;
+        if(key){
+          if(typedAnswer.value.length < 3) typedAnswer.value += key;
+          return;
+        }
+        if(action === 'backspace') typedAnswer.value = typedAnswer.value.slice(0, -1);
+        if(action === 'clear') typedAnswer.value = '';
+        if(action === 'check') checkTyped();
+      });
+    });
+
+    renderMenu();
+    showScreen('menu');
+  })();
+  </script>
+</body>
+</html>
